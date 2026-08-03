@@ -5,33 +5,84 @@
 <title>Alpha Delta Kennel — Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="css/style.css">
+
+<!-- Feather Icons -->
+<script src="https://unpkg.com/feather-icons"></script>
 </head>
+
 <body>
   <div class="app-shell">
+    
+    <!-- Sidebar -->
     <aside class="sidebar">
-      <div class="sidebar-profile">
-        <div class="sidebar-avatar">🐾</div>
+      <div class="sidebar-profile fade-in">
+        <div class="sidebar-avatar">
+          <i data-feather="user"></i>
+        </div>
         <div>
           <div class="sidebar-name" id="sidebarName">Welcome</div>
           <div class="sidebar-role" id="sidebarRole"></div>
         </div>
       </div>
+
       <nav class="sidebar-nav">
-        <a href="dashboard.html" class="active">Dashboard</a>
-        <a href="home.html">Dogs</a>
+        <a href="dashboard.html" class="active">
+          <i data-feather="grid"></i> Dashboard
+        </a>
+        <a href="home.html">
+          <i data-feather="dog"></i> Dogs
+        </a>
       </nav>
-      <button class="sidebar-logout" onclick="logout()">Log out</button>
+
+      <button class="sidebar-logout" onclick="logout()">
+        <i data-feather="log-out"></i> Log out
+      </button>
     </aside>
 
-    <main class="main">
-      <h2>Dashboard</h2>
+    <!-- Main -->
+    <main class="main fade-in-up">
+      <h2 class="page-title">
+        <i data-feather="activity"></i> Dashboard Overview
+      </h2>
+
       <div class="stat-grid" id="statGrid">
-        <div class="stat-card"><div class="stat-label">Total Number of Dogs</div><div class="stat-value" id="statTotal">—</div></div>
-        <div class="stat-card"><div class="stat-label">Number of Active Dogs</div><div class="stat-value" id="statActive">—</div></div>
-        <div class="stat-card"><div class="stat-label">Number of Dogs by Breed</div><div class="stat-value" id="statBreed">—</div></div>
-        <div class="stat-card"><div class="stat-label">Number of Male vs Female Dogs</div><div class="stat-value" id="statGender">—</div></div>
-        <div class="stat-card"><div class="stat-label">Number of Deceased Dogs</div><div class="stat-value" id="statDeceased">—</div></div>
-        <div class="stat-card"><div class="stat-label">Dogs With Missing Information</div><div class="stat-value" id="statMissing">—</div></div>
+
+        <div class="stat-card pop">
+          <i class="stat-icon" data-feather="hash"></i>
+          <div class="stat-label">Total Number of Dogs</div>
+          <div class="stat-value" id="statTotal">—</div>
+        </div>
+
+        <div class="stat-card pop">
+          <i class="stat-icon" data-feather="heart"></i>
+          <div class="stat-label">Active Dogs</div>
+          <div class="stat-value" id="statActive">—</div>
+        </div>
+
+        <div class="stat-card pop">
+          <i class="stat-icon" data-feather="layers"></i>
+          <div class="stat-label">Dogs by Breed</div>
+          <div class="stat-value" id="statBreed">—</div>
+        </div>
+
+        <div class="stat-card pop">
+          <i class="stat-icon" data-feather="users"></i>
+          <div class="stat-label">Male vs Female</div>
+          <div class="stat-value" id="statGender">—</div>
+        </div>
+
+        <div class="stat-card pop">
+          <i class="stat-icon" data-feather="x-circle"></i>
+          <div class="stat-label">Deceased Dogs</div>
+          <div class="stat-value" id="statDeceased">—</div>
+        </div>
+
+        <div class="stat-card pop">
+          <i class="stat-icon" data-feather="alert-triangle"></i>
+          <div class="stat-label">Missing Information</div>
+          <div class="stat-value" id="statMissing">—</div>
+        </div>
+
       </div>
     </main>
   </div>
@@ -44,6 +95,7 @@
     (async () => {
       try {
         const stats = await apiRequest('/dashboard/stats');
+
         document.getElementById('statTotal').textContent = stats.totalDogs;
         document.getElementById('statActive').textContent = stats.activeDogs;
         document.getElementById('statDeceased').textContent = stats.deceasedDogs;
@@ -59,10 +111,14 @@
         const female = stats.dogsByGender.find(g => /female/i.test(g.gender));
         document.getElementById('statGender').textContent =
           `${male ? male.count : 0} / ${female ? female.count : 0}`;
+
       } catch (err) {
         alert(err.message);
       }
     })();
+
+    // Activate icons
+    feather.replace();
   </script>
 </body>
 </html>
