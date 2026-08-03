@@ -1,6 +1,6 @@
 // Update this once your backend is deployed on Railway, e.g.
 // const API_BASE_URL = 'https://your-app.up.railway.app/api';
-const API_BASE_URL = 'postgresql://postgres:PAlvigYNZCGUkYjQIHNyGbOfnHxhUStk@postgres.railway.internal:5432/railway';
+const API_BASE_URL = 'https://adk-webapp-production.up.railway.app/api';
 
 async function apiRequest(path, { method = 'GET', body, auth = true } = {}) {
   const headers = { 'Content-Type': 'application/json' };
