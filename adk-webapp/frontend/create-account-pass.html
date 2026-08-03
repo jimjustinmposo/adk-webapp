@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Alpha Delta Kennel — Admin Verification</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <h1>Welcome to Alpha Delta Kennel</h1>
+      <p class="subtitle">Create new account page pass</p>
+
+      <div class="error-msg" id="errorMsg"></div>
+
+      <form id="passForm">
+        <div class="field">
+          <label for="adminPassword">Admin Password</label>
+          <input type="password" id="adminPassword" required autofocus>
+        </div>
+        <button type="submit" class="btn btn-primary" id="verifyBtn">Continue</button>
+      </form>
+
+      <div class="link-row">
+        <a href="index.html">Back to login</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    const form = document.getElementById('passForm');
+    const errorMsg = document.getElementById('errorMsg');
+    const verifyBtn = document.getElementById('verifyBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.classList.remove('show');
+      verifyBtn.disabled = true;
+      verifyBtn.textContent = 'Checking...';
+
+      const password = document.getElementById('adminPassword').value;
+
+      try {
+        await apiRequest('/auth/verify-admin-password', {
+          method: 'POST',
+          auth: false,
+          body: { password }
+        });
+        // Carry the verified password forward so the register call can
+        // re-check it server-side without asking the user twice.
+        sessionStorage.setItem('adk_admin_pass', password);
+        window.location.href = 'create-account.html';
+      } catch (err) {
+        errorMsg.innerHTML = 'Incorrect password. Contact <strong>Jim Justin M. Poso</strong> at <strong>0501905318</strong> to create a new account.';
+        errorMsg.classList.add('show');
+      } finally {
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = 'Continue';
+      }
+    });
+  </script>
+</body>
+</html>

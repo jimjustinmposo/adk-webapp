@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Alpha Delta Kennel — Create Account</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <h1>Welcome to Alpha Delta Kennel</h1>
+      <p class="subtitle">Create new account page</p>
+
+      <div class="error-msg" id="errorMsg"></div>
+
+      <form id="registerForm">
+        <div class="field">
+          <label for="fullname">Full Name</label>
+          <input type="text" id="fullname" required>
+        </div>
+        <div class="field">
+          <label for="nickname">Nick Name</label>
+          <input type="text" id="nickname" required>
+        </div>
+        <div class="field">
+          <label for="designation">Designation</label>
+          <input type="text" id="designation">
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="adminrights">
+          <label for="adminrights">Admin Rights</label>
+        </div>
+        <div class="field">
+          <label for="username">User Name</label>
+          <input type="text" id="username" required>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" required minlength="6">
+        </div>
+        <button type="submit" class="btn btn-primary" id="saveBtn">Save</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    // Guard: you must have passed the admin-password gate first.
+    const adminPass = sessionStorage.getItem('adk_admin_pass');
+    if (!adminPass) window.location.href = 'create-account-pass.html';
+
+    const form = document.getElementById('registerForm');
+    const errorMsg = document.getElementById('errorMsg');
+    const saveBtn = document.getElementById('saveBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.classList.remove('show');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving...';
+
+      try {
+        await apiRequest('/auth/register', {
+          method: 'POST',
+          auth: false,
+          body: {
+            adminPassword: adminPass,
+            fullname: document.getElementById('fullname').value.trim(),
+            nickname: document.getElementById('nickname').value.trim(),
+            designation: document.getElementById('designation').value.trim(),
+            username: document.getElementById('username').value.trim(),
+            password: document.getElementById('password').value,
+            adminrights: document.getElementById('adminrights').checked
+          }
+        });
+        sessionStorage.removeItem('adk_admin_pass');
+        alert('Account created. You can now log in.');
+        window.location.href = 'index.html';
+      } catch (err) {
+        errorMsg.textContent = err.message;
+        errorMsg.classList.add('show');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save';
+      }
+    });
+  </script>
+</body>
+</html>

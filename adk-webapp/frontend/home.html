@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Alpha Delta Kennel — Dogs</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-profile">
+        <div class="sidebar-avatar">🐾</div>
+        <div>
+          <div class="sidebar-name" id="sidebarName">Welcome</div>
+          <div class="sidebar-role" id="sidebarRole"></div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="home.html" class="active">Dogs</a>
+      </nav>
+      <button class="sidebar-logout" onclick="logout()">Log out</button>
+    </aside>
+
+    <main class="main">
+      <h2>Dog Information Database</h2>
+
+      <div class="toolbar">
+        <div class="search-box">
+          🔍 <input type="text" id="searchInput" placeholder="search dog">
+        </div>
+        <button class="btn btn-primary" id="addBtn">+ Add New Dog</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>DogID</th><th>Breed</th><th>Dog Name</th><th>Nick Name</th><th>Gender</th>
+            <th>DOB</th><th>Microchip</th><th>Father</th><th>Mother</th><th>Comments</th><th>Status</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="dogTableBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none;">No dogs found.</div>
+    </main>
+  </div>
+
+  <!-- View Details Modal (read-only, shows full text incl. long comments) -->
+  <div class="modal-overlay" id="viewModalOverlay">
+    <div class="modal">
+      <div id="viewModalBody"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="viewCloseBtn" style="flex:none; width:100%;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add / Edit Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <form id="dogForm">
+        <input type="hidden" id="dogId">
+        <div class="field"><label>Breed</label><input type="text" id="breed"></div>
+        <div class="field"><label>Dog Name</label><input type="text" id="dogname"></div>
+        <div class="field"><label>Nick Name</label><input type="text" id="nickname"></div>
+        <div class="field">
+          <label>Gender</label>
+          <select id="gender">
+            <option value="">Select</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+        </div>
+        <div class="field"><label>Date of Birth</label><input type="date" id="dob"></div>
+        <div class="field"><label>Microchip Number</label><input type="text" id="microchip"></div>
+        <div class="field"><label>Father</label><input type="text" id="father"></div>
+        <div class="field"><label>Mother</label><input type="text" id="mother"></div>
+        <div class="field">
+          <label>Status</label>
+          <select id="status">
+            <option value="active">Active</option>
+            <option value="deceased">Deceased</option>
+          </select>
+        </div>
+        <div class="field"><label>Comments</label><textarea id="comment" rows="3"></textarea></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    requireLogin();
+    renderSidebarProfile();
+    const user = getCurrentUser();
+
+    const tbody = document.getElementById('dogTableBody');
+    const emptyState = document.getElementById('emptyState');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const dogForm = document.getElementById('dogForm');
+
+    async function loadDogs(search = '') {
+      try {
+        const q = search ? `?search=${encodeURIComponent(search)}` : '';
+        const data = await apiRequest(`/dogs${q}`);
+        renderDogs(data.dogs);
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    function renderDogs(dogs) {
+      tbody.innerHTML = '';
+      emptyState.style.display = dogs.length ? 'none' : 'block';
+      for (const d of dogs) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${d.dogid}</td><td>${d.breed || ''}</td><td>${d.dogname || ''}</td>
+          <td>${d.nickname || ''}</td><td>${d.gender || ''}</td>
+          <td>${d.dob ? new Date(d.dob).toLocaleDateString() : ''}</td>
+          <td>${d.microchip || ''}</td><td>${d.father || ''}</td><td>${d.mother || ''}</td>
+          <td class="truncate-cell" title="Click row to view full details">${d.comment || ''}</td><td>${d.status}</td>
+          <td class="actions">
+            <button class="btn btn-secondary" data-view="${d.dogid}">View</button>
+            ${user.adminrights ? `<button class="btn btn-secondary" data-edit="${d.dogid}">Edit</button>
+            <button class="btn btn-danger" data-delete="${d.dogid}">Delete</button>` : ''}
+          </td>`;
+        tbody.appendChild(tr);
+        tr.dataset.dog = JSON.stringify(d);
+        tr.style.cursor = 'pointer';
+      }
+    }
+
+    document.getElementById('searchInput').addEventListener('input', (e) => loadDogs(e.target.value));
+
+    function openModal(dog = null) {
+      dogForm.reset();
+      document.getElementById('dogId').value = dog ? dog.dogid : '';
+      if (dog) {
+        document.getElementById('breed').value = dog.breed || '';
+        document.getElementById('dogname').value = dog.dogname || '';
+        document.getElementById('nickname').value = dog.nickname || '';
+        document.getElementById('gender').value = dog.gender || '';
+        document.getElementById('dob').value = dog.dob ? dog.dob.substring(0, 10) : '';
+        document.getElementById('microchip').value = dog.microchip || '';
+        document.getElementById('father').value = dog.father || '';
+        document.getElementById('mother').value = dog.mother || '';
+        document.getElementById('status').value = dog.status || 'active';
+        document.getElementById('comment').value = dog.comment || '';
+      }
+      modalOverlay.classList.add('show');
+    }
+    function closeModal() { modalOverlay.classList.remove('show'); }
+
+    document.getElementById('addBtn').addEventListener('click', () => openModal());
+    document.getElementById('cancelBtn').addEventListener('click', closeModal);
+
+    const viewModalOverlay = document.getElementById('viewModalOverlay');
+    const viewModalBody = document.getElementById('viewModalBody');
+
+    function openViewModal(dog) {
+      const rows = [
+        ['DogID', dog.dogid],
+        ['Breed', dog.breed],
+        ['Dog Name', dog.dogname],
+        ['Nick Name', dog.nickname],
+        ['Gender', dog.gender],
+        ['Date of Birth', dog.dob ? new Date(dog.dob).toLocaleDateString() : ''],
+        ['Microchip Number', dog.microchip],
+        ['Father', dog.father],
+        ['Mother', dog.mother],
+        ['Status', dog.status]
+      ];
+      viewModalBody.innerHTML = rows.map(([label, value]) => `
+        <div class="field">
+          <label>${label}</label>
+          <div style="background:#fff; border-radius:8px; padding:10px 14px; font-size:14px; color:var(--text); min-height:20px;">
+            ${value || value === 0 ? value : '<span style="opacity:0.5;">—</span>'}
+          </div>
+        </div>
+      `).join('') + `
+        <div class="field">
+          <label>Comments</label>
+          <div style="background:#fff; border-radius:8px; padding:10px 14px; font-size:14px; color:var(--text); white-space:pre-wrap; max-height:220px; overflow-y:auto; min-height:20px;">
+            ${dog.comment ? dog.comment.replace(/</g, '&lt;') : '<span style="opacity:0.5;">No comments</span>'}
+          </div>
+        </div>
+      `;
+      viewModalOverlay.classList.add('show');
+    }
+    document.getElementById('viewCloseBtn').addEventListener('click', () => viewModalOverlay.classList.remove('show'));
+
+    tbody.addEventListener('click', (e) => {
+      const editId = e.target.getAttribute('data-edit');
+      const delId = e.target.getAttribute('data-delete');
+      const viewId = e.target.getAttribute('data-view');
+
+      if (editId) {
+        const dog = JSON.parse(e.target.closest('tr').dataset.dog);
+        openModal(dog);
+        return;
+      }
+      if (delId) { deleteDog(delId); return; }
+      if (viewId) {
+        const dog = JSON.parse(e.target.closest('tr').dataset.dog);
+        openViewModal(dog);
+        return;
+      }
+      // Clicking anywhere else on the row (not a button) also opens the view modal
+      const tr = e.target.closest('tr');
+      if (tr && !e.target.closest('button')) {
+        openViewModal(JSON.parse(tr.dataset.dog));
+      }
+    });
+
+    async function deleteDog(id) {
+      if (!confirm('Delete this dog record?')) return;
+      try {
+        await apiRequest(`/dogs/${id}`, { method: 'DELETE' });
+        loadDogs(document.getElementById('searchInput').value);
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    dogForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('dogId').value;
+      const body = {
+        breed: document.getElementById('breed').value,
+        dogname: document.getElementById('dogname').value,
+        nickname: document.getElementById('nickname').value,
+        gender: document.getElementById('gender').value,
+        dob: document.getElementById('dob').value || null,
+        microchip: document.getElementById('microchip').value,
+        father: document.getElementById('father').value,
+        mother: document.getElementById('mother').value,
+        status: document.getElementById('status').value,
+        comment: document.getElementById('comment').value
+      };
+      try {
+        if (id) {
+          await apiRequest(`/dogs/${id}`, { method: 'PUT', body });
+        } else {
+          await apiRequest('/dogs', { method: 'POST', body });
+        }
+        closeModal();
+        loadDogs(document.getElementById('searchInput').value);
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    loadDogs();
+  </script>
+</body>
+</html>

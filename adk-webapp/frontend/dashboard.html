@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Alpha Delta Kennel — Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-profile">
+        <div class="sidebar-avatar">🐾</div>
+        <div>
+          <div class="sidebar-name" id="sidebarName">Welcome</div>
+          <div class="sidebar-role" id="sidebarRole"></div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="active">Dashboard</a>
+        <a href="home.html">Dogs</a>
+      </nav>
+      <button class="sidebar-logout" onclick="logout()">Log out</button>
+    </aside>
+
+    <main class="main">
+      <h2>Dashboard</h2>
+      <div class="stat-grid" id="statGrid">
+        <div class="stat-card"><div class="stat-label">Total Number of Dogs</div><div class="stat-value" id="statTotal">—</div></div>
+        <div class="stat-card"><div class="stat-label">Number of Active Dogs</div><div class="stat-value" id="statActive">—</div></div>
+        <div class="stat-card"><div class="stat-label">Number of Dogs by Breed</div><div class="stat-value" id="statBreed">—</div></div>
+        <div class="stat-card"><div class="stat-label">Number of Male vs Female Dogs</div><div class="stat-value" id="statGender">—</div></div>
+        <div class="stat-card"><div class="stat-label">Number of Deceased Dogs</div><div class="stat-value" id="statDeceased">—</div></div>
+        <div class="stat-card"><div class="stat-label">Dogs With Missing Information</div><div class="stat-value" id="statMissing">—</div></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    requireLogin();
+    renderSidebarProfile();
+
+    (async () => {
+      try {
+        const stats = await apiRequest('/dashboard/stats');
+        document.getElementById('statTotal').textContent = stats.totalDogs;
+        document.getElementById('statActive').textContent = stats.activeDogs;
+        document.getElementById('statDeceased').textContent = stats.deceasedDogs;
+        document.getElementById('statMissing').textContent = stats.dogsWithMissingInfo;
+
+        const breedText = stats.dogsByBreed.length
+          ? stats.dogsByBreed.map(b => `${b.breed}: ${b.count}`).join(' · ')
+          : '0';
+        document.getElementById('statBreed').textContent = stats.dogsByBreed.length || 0;
+        document.getElementById('statBreed').title = breedText;
+
+        const male = stats.dogsByGender.find(g => /male/i.test(g.gender) && !/female/i.test(g.gender));
+        const female = stats.dogsByGender.find(g => /female/i.test(g.gender));
+        document.getElementById('statGender').textContent =
+          `${male ? male.count : 0} / ${female ? female.count : 0}`;
+      } catch (err) {
+        alert(err.message);
+      }
+    })();
+  </script>
+</body>
+</html>
