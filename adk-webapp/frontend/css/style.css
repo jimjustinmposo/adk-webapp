@@ -1,0 +1,259 @@
+:root {
+  --teal: #1c5d78;
+  --teal-dark: #164a60;
+  --teal-light: #e8f1f4;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --border: #e2e8f0;
+  --danger: #dc2626;
+  --radius: 12px;
+
+  /* Modern additions */
+  --glass: rgba(255,255,255,0.55);
+  --blur: 18px;
+  --shadow-soft: 0 8px 28px rgba(0,0,0,0.08);
+  --shadow-hover: 0 12px 32px rgba(0,0,0,0.12);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text);
+  background: linear-gradient(135deg, #f5f7f9, #eef2f5);
+  animation: fadeBody 0.6s ease;
+}
+
+/* ---------- Auth pages ---------- */
+.auth-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.auth-card {
+  background: var(--glass);
+  backdrop-filter: blur(var(--blur));
+  width: 100%;
+  max-width: 420px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  padding: 40px 36px;
+  animation: floatUp 0.6s ease;
+  border: 1px solid rgba(255,255,255,0.35);
+}
+
+.auth-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+  transition: 0.25s ease;
+}
+
+.auth-card h1 {
+  color: var(--teal);
+  font-size: 24px;
+  margin: 0 0 4px;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.auth-card .subtitle {
+  text-align: center;
+  color: var(--muted);
+  margin: 0 0 28px;
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+.field { margin-bottom: 18px; }
+
+.field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+.field input, .field select, .field textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 14px;
+  transition: all 0.25s ease;
+  background: #fff;
+}
+
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none;
+  border-color: var(--teal);
+  box-shadow: 0 0 0 4px rgba(28,93,120,0.15);
+  transform: translateY(-2px);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+  color: #fff;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(28,93,120,0.25);
+}
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(28,93,120,0.35);
+}
+
+.btn-secondary {
+  background: #eef2f5;
+  color: var(--text);
+}
+.btn-secondary:hover {
+  background: #e2e8ec;
+  transform: translateY(-2px);
+}
+
+.btn-danger {
+  background: #fdecec;
+  color: var(--danger);
+}
+.btn-danger:hover {
+  background: #fbdada;
+  transform: translateY(-2px);
+}
+
+/* Error message */
+.error-msg {
+  background: #fdecec;
+  color: var(--danger);
+  border: 1px solid #f6c6c6;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  margin-bottom: 16px;
+  display: none;
+}
+.error-msg.show {
+  display: block;
+  animation: shake 0.3s ease;
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, var(--teal), var(--teal-dark));
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 28px 20px;
+  box-shadow: 4px 0 18px rgba(0,0,0,0.15);
+  animation: slideInLeft 0.5s ease;
+}
+
+.sidebar-nav a {
+  color: #fff;
+  text-decoration: none;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  opacity: 0.85;
+  transition: all 0.25s ease;
+}
+.sidebar-nav a:hover {
+  background: rgba(255,255,255,0.18);
+  transform: translateX(4px);
+  opacity: 1;
+}
+
+/* ---------- Dashboard Cards ---------- */
+.stat-card {
+  background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+  color: #fff;
+  border-radius: var(--radius);
+  min-height: 130px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  box-shadow: var(--shadow-soft);
+  transition: all 0.25s ease;
+  animation: floatFade 0.6s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: var(--shadow-hover);
+}
+
+/* ---------- Modal ---------- */
+.modal-overlay.show {
+  display: flex;
+  animation: fadeIn 0.25s ease;
+}
+
+.modal {
+  background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+  border-radius: var(--radius);
+  padding: 28px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 88vh;
+  overflow-y: auto;
+  animation: floatUp 0.4s ease;
+  box-shadow: var(--shadow-soft);
+}
+
+/* ---------- Animations ---------- */
+@keyframes floatUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes floatFade {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeBody {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes shake {
+  0%,100%{transform:translateX(0);}
+  25%{transform:translateX(-4px);}
+  75%{transform:translateX(4px);}
+}
