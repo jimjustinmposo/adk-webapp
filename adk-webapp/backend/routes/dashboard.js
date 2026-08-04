@@ -8,7 +8,7 @@ router.use(verifyToken);
 // GET /api/dashboard/stats
 router.get('/stats', async (req, res) => {
   try {
-    const [total, active, deceased, byBreed, byGender, missing] = await Promise.all([
+    const [total, active, deceased, byBreed, byGender, missing, inUSA] = await Promise.all([
       pool.query('SELECT COUNT(*) FROM dogtb'),
       pool.query(`SELECT COUNT(*) FROM dogtb WHERE status = 'active'`),
       pool.query(`SELECT COUNT(*) FROM dogtb WHERE status = 'deceased'`),
@@ -18,7 +18,8 @@ router.get('/stats', async (req, res) => {
         breed IS NULL OR breed = '' OR dogname IS NULL OR dogname = '' OR
         gender IS NULL OR gender = '' OR dob IS NULL OR
         microchip IS NULL OR microchip = '' OR father IS NULL OR father = '' OR
-        mother IS NULL OR mother = ''`)
+        mother IS NULL OR mother = ''`),
+      pool.query(`SELECT COUNT(*) FROM dogtb WHERE comment ILIKE '%Location: USA%'`)
     ]);
 
     res.json({
@@ -27,7 +28,8 @@ router.get('/stats', async (req, res) => {
       deceasedDogs: Number(deceased.rows[0].count),
       dogsByBreed: byBreed.rows.map(r => ({ breed: r.breed, count: Number(r.count) })),
       dogsByGender: byGender.rows.map(r => ({ gender: r.gender, count: Number(r.count) })),
-      dogsWithMissingInfo: Number(missing.rows[0].count)
+      dogsWithMissingInfo: Number(missing.rows[0].count),
+      dogsInUSA: Number(inUSA.rows[0].count)
     });
   } catch (err) {
     console.error(err);
