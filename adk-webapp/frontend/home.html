@@ -5,43 +5,60 @@
 <title>Alpha Delta Kennel — Dogs</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="css/style.css">
+<!-- Feather Icons -->
+<script src="https://unpkg.com/feather-icons"></script>
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar">
-      <div class="sidebar-profile">
-        <div class="sidebar-avatar">🐾</div>
+      <div class="sidebar-profile fade-in">
+        <div class="sidebar-avatar">
+          <i data-feather="user"></i>
+        </div>
         <div>
           <div class="sidebar-name" id="sidebarName">Welcome</div>
           <div class="sidebar-role" id="sidebarRole"></div>
         </div>
       </div>
       <nav class="sidebar-nav">
-        <a href="dashboard.html">Dashboard</a>
-        <a href="home.html" class="active">Dogs</a>
+        <a href="dashboard.html">
+          <i data-feather="grid"></i> Dashboard
+        </a>
+        <a href="home.html" class="active">
+          <i data-feather="list"></i> Dogs
+        </a>
       </nav>
-      <button class="sidebar-logout" onclick="logout()">Log out</button>
+      <button class="sidebar-logout" onclick="logout()">
+        <i data-feather="log-out"></i> Log out
+      </button>
     </aside>
 
-    <main class="main">
-      <h2>Dog Information Database</h2>
+    <main class="main fade-in-up">
+      <h2 class="page-title"><i data-feather="database"></i> Dog Information Database</h2>
+
+      <div id="filterChipHolder"></div>
 
       <div class="toolbar">
         <div class="search-box">
-          🔍 <input type="text" id="searchInput" placeholder="search dog">
+          <i data-feather="search"></i>
+          <input type="text" id="searchInput" placeholder="Search by name, breed, nickname, or microchip...">
         </div>
-        <button class="btn btn-primary" id="addBtn">+ Add New Dog</button>
+        <button class="btn btn-primary" id="addBtn" style="width:auto;">
+          <i data-feather="plus"></i> Add New Dog
+        </button>
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>DogID</th><th>Breed</th><th>Dog Name</th><th>Nick Name</th><th>Gender</th>
-            <th>DOB</th><th>Microchip</th><th>Father</th><th>Mother</th><th>Comments</th><th>Status</th><th></th>
-          </tr>
-        </thead>
-        <tbody id="dogTableBody"></tbody>
-      </table>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>DogID</th><th>Breed</th><th>Dog Name</th><th>Nick Name</th><th>Gender</th>
+              <th>DOB</th><th>Microchip</th><th>Father</th><th>Mother</th><th>Comments</th><th>Status</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="dogTableBody"></tbody>
+        </table>
+      </div>
       <div class="empty-state" id="emptyState" style="display:none;">No dogs found.</div>
     </main>
   </div>
@@ -51,7 +68,9 @@
     <div class="modal">
       <div id="viewModalBody"></div>
       <div class="modal-actions">
-        <button type="button" class="btn btn-secondary" id="viewCloseBtn" style="flex:none; width:100%;">Close</button>
+        <button type="button" class="btn btn-secondary" id="viewCloseBtn" style="flex:none; width:100%;">
+          <i data-feather="x"></i> Close
+        </button>
       </div>
     </div>
   </div>
@@ -86,7 +105,7 @@
         <div class="field"><label>Comments</label><textarea id="comment" rows="3"></textarea></div>
         <div class="modal-actions">
           <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save</button>
+          <button type="submit" class="btn btn-primary"><i data-feather="save"></i> Save</button>
         </div>
       </form>
     </div>
@@ -103,11 +122,51 @@
     const modalOverlay = document.getElementById('modalOverlay');
     const dogForm = document.getElementById('dogForm');
 
+    // Read filter params passed from dashboard card links
+    const urlParams = new URLSearchParams(window.location.search);
+    const statusFilter = urlParams.get('status');   // 'active' | 'deceased'
+    const missingFilter = urlParams.get('filter');   // 'missing'
+    const sortBy = urlParams.get('sort');            // 'breed' | 'gender'
+
+    function isMissingInfo(d) {
+      const req = [d.breed, d.dogname, d.gender, d.dob, d.microchip, d.father, d.mother];
+      return req.some(v => v === null || v === undefined || v === '');
+    }
+
+    function applyClientFilters(dogs) {
+      let result = dogs;
+      if (statusFilter) result = result.filter(d => d.status === statusFilter);
+      if (missingFilter === 'missing') result = result.filter(isMissingInfo);
+      if (sortBy === 'breed') result = [...result].sort((a, b) => (a.breed || '').localeCompare(b.breed || ''));
+      if (sortBy === 'gender') result = [...result].sort((a, b) => (a.gender || '').localeCompare(b.gender || ''));
+      return result;
+    }
+
+    function renderFilterChip() {
+      const holder = document.getElementById('filterChipHolder');
+      let label = null;
+      if (statusFilter === 'active') label = 'Showing: Active Dogs';
+      else if (statusFilter === 'deceased') label = 'Showing: Deceased Dogs';
+      else if (missingFilter === 'missing') label = 'Showing: Dogs With Missing Information';
+      else if (sortBy === 'breed') label = 'Sorted by: Breed';
+      else if (sortBy === 'gender') label = 'Sorted by: Gender';
+
+      if (!label) { holder.innerHTML = ''; return; }
+      holder.innerHTML = `
+        <div class="filter-chip">
+          <i data-feather="filter" style="width:14px;height:14px;"></i> ${label}
+          <button onclick="window.location.href='home.html'" title="Clear filter">
+            <i data-feather="x" style="width:14px;height:14px;"></i>
+          </button>
+        </div>`;
+      feather.replace();
+    }
+
     async function loadDogs(search = '') {
       try {
         const q = search ? `?search=${encodeURIComponent(search)}` : '';
         const data = await apiRequest(`/dogs${q}`);
-        renderDogs(data.dogs);
+        renderDogs(applyClientFilters(data.dogs));
       } catch (err) {
         alert(err.message);
       }
@@ -118,21 +177,23 @@
       emptyState.style.display = dogs.length ? 'none' : 'block';
       for (const d of dogs) {
         const tr = document.createElement('tr');
+        const statusPill = `<span class="status-pill ${d.status}">${d.status}</span>`;
         tr.innerHTML = `
           <td>${d.dogid}</td><td>${d.breed || ''}</td><td>${d.dogname || ''}</td>
           <td>${d.nickname || ''}</td><td>${d.gender || ''}</td>
           <td>${d.dob ? new Date(d.dob).toLocaleDateString() : ''}</td>
           <td>${d.microchip || ''}</td><td>${d.father || ''}</td><td>${d.mother || ''}</td>
-          <td class="truncate-cell" title="Click row to view full details">${d.comment || ''}</td><td>${d.status}</td>
+          <td class="truncate-cell" title="Click row to view full details">${d.comment || ''}</td>
+          <td>${statusPill}</td>
           <td class="actions">
-            <button class="btn btn-secondary" data-view="${d.dogid}">View</button>
-            ${user.adminrights ? `<button class="btn btn-secondary" data-edit="${d.dogid}">Edit</button>
-            <button class="btn btn-danger" data-delete="${d.dogid}">Delete</button>` : ''}
+            <button class="btn btn-secondary" data-view="${d.dogid}"><i data-feather="eye"></i></button>
+            ${user.adminrights ? `<button class="btn btn-secondary" data-edit="${d.dogid}"><i data-feather="edit-2"></i></button>
+            <button class="btn btn-danger" data-delete="${d.dogid}"><i data-feather="trash-2"></i></button>` : ''}
           </td>`;
         tbody.appendChild(tr);
         tr.dataset.dog = JSON.stringify(d);
-        tr.style.cursor = 'pointer';
       }
+      feather.replace();
     }
 
     document.getElementById('searchInput').addEventListener('input', (e) => loadDogs(e.target.value));
@@ -178,14 +239,14 @@
       viewModalBody.innerHTML = rows.map(([label, value]) => `
         <div class="field">
           <label>${label}</label>
-          <div style="background:#fff; border-radius:8px; padding:10px 14px; font-size:14px; color:var(--text); min-height:20px;">
+          <div style="background:rgba(255,255,255,0.92); border-radius:8px; padding:10px 14px; font-size:14px; color:var(--text); min-height:20px;">
             ${value || value === 0 ? value : '<span style="opacity:0.5;">—</span>'}
           </div>
         </div>
       `).join('') + `
         <div class="field">
           <label>Comments</label>
-          <div style="background:#fff; border-radius:8px; padding:10px 14px; font-size:14px; color:var(--text); white-space:pre-wrap; max-height:220px; overflow-y:auto; min-height:20px;">
+          <div style="background:rgba(255,255,255,0.92); border-radius:8px; padding:10px 14px; font-size:14px; color:var(--text); white-space:pre-wrap; max-height:220px; overflow-y:auto; min-height:20px;">
             ${dog.comment ? dog.comment.replace(/</g, '&lt;') : '<span style="opacity:0.5;">No comments</span>'}
           </div>
         </div>
@@ -195,22 +256,21 @@
     document.getElementById('viewCloseBtn').addEventListener('click', () => viewModalOverlay.classList.remove('show'));
 
     tbody.addEventListener('click', (e) => {
-      const editId = e.target.getAttribute('data-edit');
-      const delId = e.target.getAttribute('data-delete');
-      const viewId = e.target.getAttribute('data-view');
+      const editBtn = e.target.closest('[data-edit]');
+      const delBtn = e.target.closest('[data-delete]');
+      const viewBtn = e.target.closest('[data-view]');
 
-      if (editId) {
-        const dog = JSON.parse(e.target.closest('tr').dataset.dog);
+      if (editBtn) {
+        const dog = JSON.parse(editBtn.closest('tr').dataset.dog);
         openModal(dog);
         return;
       }
-      if (delId) { deleteDog(delId); return; }
-      if (viewId) {
-        const dog = JSON.parse(e.target.closest('tr').dataset.dog);
+      if (delBtn) { deleteDog(delBtn.getAttribute('data-delete')); return; }
+      if (viewBtn) {
+        const dog = JSON.parse(viewBtn.closest('tr').dataset.dog);
         openViewModal(dog);
         return;
       }
-      // Clicking anywhere else on the row (not a button) also opens the view modal
       const tr = e.target.closest('tr');
       if (tr && !e.target.closest('button')) {
         openViewModal(JSON.parse(tr.dataset.dog));
@@ -255,7 +315,9 @@
       }
     });
 
+    renderFilterChip();
     loadDogs();
+    feather.replace();
   </script>
 </body>
 </html>

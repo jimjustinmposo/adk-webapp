@@ -5,14 +5,13 @@
 <title>Alpha Delta Kennel — Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="css/style.css">
-
 <!-- Feather Icons -->
 <script src="https://unpkg.com/feather-icons"></script>
 </head>
 
 <body>
   <div class="app-shell">
-    
+
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-profile fade-in">
@@ -30,7 +29,7 @@
           <i data-feather="grid"></i> Dashboard
         </a>
         <a href="home.html">
-          <i data-feather="dog"></i> Dogs
+          <i data-feather="list"></i> Dogs
         </a>
       </nav>
 
@@ -47,41 +46,41 @@
 
       <div class="stat-grid" id="statGrid">
 
-        <div class="stat-card pop">
+        <a class="stat-card pop" href="home.html">
           <i class="stat-icon" data-feather="hash"></i>
           <div class="stat-label">Total Number of Dogs</div>
           <div class="stat-value" id="statTotal">—</div>
-        </div>
+        </a>
 
-        <div class="stat-card pop">
+        <a class="stat-card pop" href="home.html?status=active">
           <i class="stat-icon" data-feather="heart"></i>
           <div class="stat-label">Active Dogs</div>
           <div class="stat-value" id="statActive">—</div>
-        </div>
+        </a>
 
-        <div class="stat-card pop">
+        <a class="stat-card pop" href="home.html?sort=breed">
           <i class="stat-icon" data-feather="layers"></i>
           <div class="stat-label">Dogs by Breed</div>
           <div class="stat-value" id="statBreed">—</div>
-        </div>
+        </a>
 
-        <div class="stat-card pop">
+        <a class="stat-card pop" href="home.html?sort=gender">
           <i class="stat-icon" data-feather="users"></i>
           <div class="stat-label">Male vs Female</div>
           <div class="stat-value" id="statGender">—</div>
-        </div>
+        </a>
 
-        <div class="stat-card pop">
+        <a class="stat-card pop" href="home.html?status=deceased">
           <i class="stat-icon" data-feather="x-circle"></i>
           <div class="stat-label">Deceased Dogs</div>
           <div class="stat-value" id="statDeceased">—</div>
-        </div>
+        </a>
 
-        <div class="stat-card pop">
+        <a class="stat-card pop" href="home.html?filter=missing">
           <i class="stat-icon" data-feather="alert-triangle"></i>
           <div class="stat-label">Missing Information</div>
           <div class="stat-value" id="statMissing">—</div>
-        </div>
+        </a>
 
       </div>
     </main>
