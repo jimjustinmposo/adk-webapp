@@ -87,17 +87,36 @@
         <div class="field">
           <label>Photo (optional)</label>
           <div style="display:flex; align-items:center; gap:12px;">
-            <img id="photoPreview" src="" alt="" style="width:64px; height:64px; border-radius:50%; object-fit:cover; background:rgba(255,255,255,0.2); display:none;">
+            <img id="photoPreview" src="" alt="" title="Click to reposition" style="width:64px; height:64px; border-radius:50%; object-fit:cover; background:rgba(255,255,255,0.2); display:none; cursor:pointer;">
             <div id="photoPlaceholder" style="width:64px; height:64px; border-radius:50%; background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center;">
               <i data-feather="camera" style="color:#fff; opacity:0.7;"></i>
             </div>
             <div style="flex:1;">
               <input type="file" id="photoInput" accept="image/*" style="background:#fff; border-radius:8px; padding:8px;">
-              <div id="photoRemoveWrap" style="display:none; margin-top:6px;">
+              <div id="photoRemoveWrap" style="display:none; margin-top:6px; display:flex; gap:8px;">
+                <button type="button" id="photoAdjustBtn" class="btn btn-secondary" style="padding:4px 10px; font-size:12px;">Reposition</button>
                 <button type="button" id="photoRemoveBtn" class="btn btn-secondary" style="padding:4px 10px; font-size:12px;">Remove photo</button>
               </div>
             </div>
           </div>
+
+          <!-- Crop / reposition stage -->
+          <div id="cropWrap" style="display:none; margin-top:14px;">
+            <div id="cropStage" style="position:relative; width:220px; height:220px; margin:0 auto; overflow:hidden; border-radius:16px; background:#0b1a33; touch-action:none; cursor:grab;">
+              <img id="cropImage" style="position:absolute; top:0; left:0; transform-origin:0 0; user-select:none; -webkit-user-drag:none; pointer-events:none;">
+            </div>
+            <div style="display:flex; align-items:center; gap:10px; margin-top:10px; max-width:220px; margin-left:auto; margin-right:auto;">
+              <i data-feather="zoom-out" class="icon-sm" style="color:#fff;"></i>
+              <input type="range" id="cropZoom" min="100" max="300" value="100" style="flex:1;">
+              <i data-feather="zoom-in" class="icon-sm" style="color:#fff;"></i>
+            </div>
+            <p style="text-align:center; color:rgba(255,255,255,0.7); font-size:11px; margin:6px 0 0;">Drag the photo to reposition it</p>
+            <div style="display:flex; gap:10px; margin-top:10px; max-width:220px; margin-left:auto; margin-right:auto;">
+              <button type="button" id="cropCancelBtn" class="btn btn-secondary" style="flex:1; padding:8px; font-size:12px;">Cancel</button>
+              <button type="button" id="cropApplyBtn" class="btn btn-primary" style="flex:1; padding:8px; font-size:12px;">Use this photo</button>
+            </div>
+          </div>
+
           <input type="hidden" id="photoData">
         </div>
         <div class="field"><label>Breed</label><input type="text" id="breed"></div>
@@ -258,13 +277,21 @@
     const photoData = document.getElementById('photoData');
     const photoRemoveWrap = document.getElementById('photoRemoveWrap');
     const photoRemoveBtn = document.getElementById('photoRemoveBtn');
+    const photoAdjustBtn = document.getElementById('photoAdjustBtn');
+    const cropWrap = document.getElementById('cropWrap');
+    const cropStage = document.getElementById('cropStage');
+    const cropImage = document.getElementById('cropImage');
+    const cropZoom = document.getElementById('cropZoom');
+    const cropCancelBtn = document.getElementById('cropCancelBtn');
+    const cropApplyBtn = document.getElementById('cropApplyBtn');
+    const CROP_SIZE = 220;
 
     function setPhotoPreview(dataUrl) {
       if (dataUrl) {
         photoPreview.src = dataUrl;
         photoPreview.style.display = 'block';
         photoPlaceholder.style.display = 'none';
-        photoRemoveWrap.style.display = 'block';
+        photoRemoveWrap.style.display = 'flex';
         photoData.value = dataUrl;
       } else {
         photoPreview.src = '';
@@ -275,26 +302,128 @@
       }
     }
 
+    // ---- Crop / reposition tool state ----
+    let crop = { naturalW: 0, naturalH: 0, minScale: 1, scale: 1, x: 0, y: 0 };
+    let dragging = false, dragStartX = 0, dragStartY = 0, dragOrigX = 0, dragOrigY = 0;
+
+    function clampOffset() {
+      const dispW = crop.naturalW * crop.scale;
+      const dispH = crop.naturalH * crop.scale;
+      const minX = Math.min(0, CROP_SIZE - dispW);
+      const minY = Math.min(0, CROP_SIZE - dispH);
+      crop.x = Math.max(minX, Math.min(0, crop.x));
+      crop.y = Math.max(minY, Math.min(0, crop.y));
+    }
+
+    function applyCropTransform() {
+      cropImage.style.width = (crop.naturalW * crop.scale) + 'px';
+      cropImage.style.height = (crop.naturalH * crop.scale) + 'px';
+      cropImage.style.transform = `translate(${crop.x}px, ${crop.y}px)`;
+    }
+
+    function openCropper(src) {
+      cropImage.onload = () => {
+        crop.naturalW = cropImage.naturalWidth;
+        crop.naturalH = cropImage.naturalHeight;
+        crop.minScale = Math.max(CROP_SIZE / crop.naturalW, CROP_SIZE / crop.naturalH);
+        crop.scale = crop.minScale;
+        crop.x = (CROP_SIZE - crop.naturalW * crop.scale) / 2;
+        crop.y = (CROP_SIZE - crop.naturalH * crop.scale) / 2;
+        clampOffset();
+        cropZoom.value = 100;
+        applyCropTransform();
+        cropWrap.style.display = 'block';
+      };
+      cropImage.src = src;
+    }
+
     photoInput.addEventListener('change', () => {
       const file = photoInput.files[0];
       if (!file) return;
-      if (file.size > 4 * 1024 * 1024) {
-        alert('Please choose an image smaller than 4MB.');
+      if (file.size > 8 * 1024 * 1024) {
+        alert('Please choose an image smaller than 8MB.');
         photoInput.value = '';
         return;
       }
       const reader = new FileReader();
-      reader.onload = () => setPhotoPreview(reader.result);
+      reader.onload = () => openCropper(reader.result);
       reader.readAsDataURL(file);
+    });
+
+    photoPreview.addEventListener('click', () => {
+      if (photoData.value) openCropper(photoData.value);
+    });
+    photoAdjustBtn.addEventListener('click', () => {
+      if (photoData.value) openCropper(photoData.value);
+    });
+
+    cropZoom.addEventListener('input', () => {
+      const centerX = CROP_SIZE / 2, centerY = CROP_SIZE / 2;
+      const imgCenterX = (centerX - crop.x) / crop.scale;
+      const imgCenterY = (centerY - crop.y) / crop.scale;
+      crop.scale = crop.minScale * (cropZoom.value / 100);
+      crop.x = centerX - imgCenterX * crop.scale;
+      crop.y = centerY - imgCenterY * crop.scale;
+      clampOffset();
+      applyCropTransform();
+    });
+
+    function startDrag(clientX, clientY) {
+      dragging = true;
+      dragStartX = clientX; dragStartY = clientY;
+      dragOrigX = crop.x; dragOrigY = crop.y;
+      cropStage.style.cursor = 'grabbing';
+    }
+    function moveDrag(clientX, clientY) {
+      if (!dragging) return;
+      crop.x = dragOrigX + (clientX - dragStartX);
+      crop.y = dragOrigY + (clientY - dragStartY);
+      clampOffset();
+      applyCropTransform();
+    }
+    function endDrag() { dragging = false; cropStage.style.cursor = 'grab'; }
+
+    cropStage.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY));
+    window.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
+    window.addEventListener('mouseup', endDrag);
+    cropStage.addEventListener('touchstart', (e) => {
+      const t = e.touches[0]; startDrag(t.clientX, t.clientY);
+    }, { passive: true });
+    cropStage.addEventListener('touchmove', (e) => {
+      const t = e.touches[0]; moveDrag(t.clientX, t.clientY);
+    }, { passive: true });
+    cropStage.addEventListener('touchend', endDrag);
+
+    cropCancelBtn.addEventListener('click', () => {
+      cropWrap.style.display = 'none';
+      photoInput.value = '';
+    });
+
+    cropApplyBtn.addEventListener('click', () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = CROP_SIZE;
+      canvas.height = CROP_SIZE;
+      const ctx = canvas.getContext('2d');
+      const srcX = -crop.x / crop.scale;
+      const srcY = -crop.y / crop.scale;
+      const srcW = CROP_SIZE / crop.scale;
+      const srcH = CROP_SIZE / crop.scale;
+      ctx.drawImage(cropImage, srcX, srcY, srcW, srcH, 0, 0, CROP_SIZE, CROP_SIZE);
+      const finalDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      setPhotoPreview(finalDataUrl);
+      cropWrap.style.display = 'none';
+      photoInput.value = '';
     });
 
     photoRemoveBtn.addEventListener('click', () => {
       photoInput.value = '';
+      cropWrap.style.display = 'none';
       setPhotoPreview(null);
     });
 
     function openModal(dog = null) {
       dogForm.reset();
+      cropWrap.style.display = 'none';
       setPhotoPreview(dog && dog.photo ? dog.photo : null);
       document.getElementById('dogId').value = dog ? dog.dogid : '';
       if (dog) {
