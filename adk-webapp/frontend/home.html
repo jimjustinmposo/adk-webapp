@@ -48,7 +48,8 @@
         </button>
       </div>
 
-      <div class="table-wrap">
+      <div class="table-scroll-top" id="tableScrollTop"><div class="table-scroll-top-inner" id="tableScrollTopInner"></div></div>
+      <div class="table-wrap" id="tableWrap">
         <table>
           <thead>
             <tr>
@@ -194,7 +195,34 @@
         tr.dataset.dog = JSON.stringify(d);
       }
       feather.replace();
+      syncTableScrollTop();
     }
+
+    // Keeps a thin scrollbar above the table in sync with the table's own
+    // horizontal scroll, so you don't have to scroll all the way down first.
+    const tableWrap = document.getElementById('tableWrap');
+    const tableScrollTop = document.getElementById('tableScrollTop');
+    const tableScrollTopInner = document.getElementById('tableScrollTopInner');
+    let syncingScroll = false;
+
+    function syncTableScrollTop() {
+      const table = tableWrap.querySelector('table');
+      if (!table) return;
+      tableScrollTopInner.style.width = table.scrollWidth + 'px';
+    }
+    tableScrollTop.addEventListener('scroll', () => {
+      if (syncingScroll) return;
+      syncingScroll = true;
+      tableWrap.scrollLeft = tableScrollTop.scrollLeft;
+      syncingScroll = false;
+    });
+    tableWrap.addEventListener('scroll', () => {
+      if (syncingScroll) return;
+      syncingScroll = true;
+      tableScrollTop.scrollLeft = tableWrap.scrollLeft;
+      syncingScroll = false;
+    });
+    window.addEventListener('resize', syncTableScrollTop);
 
     document.getElementById('searchInput').addEventListener('input', (e) => loadDogs(e.target.value));
 
