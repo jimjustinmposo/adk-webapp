@@ -139,7 +139,7 @@
       let result = dogs;
       if (statusFilter) result = result.filter(d => d.status === statusFilter);
       if (missingFilter === 'missing') result = result.filter(isMissingInfo);
-      if (locationFilter === 'usa') result = result.filter(d => (d.comment || '').toLowerCase().includes('usa'));
+      if (locationFilter === 'usa') result = result.filter(d => (d.comment || '').toLowerCase().includes('location: usa'));
       if (sortBy === 'breed') result = [...result].sort((a, b) => (a.breed || '').localeCompare(b.breed || ''));
       if (sortBy === 'gender') result = [...result].sort((a, b) => (a.gender || '').localeCompare(b.gender || ''));
       return result;

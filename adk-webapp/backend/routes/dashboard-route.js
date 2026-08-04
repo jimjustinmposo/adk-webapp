@@ -19,7 +19,7 @@ router.get('/stats', async (req, res) => {
         gender IS NULL OR gender = '' OR dob IS NULL OR
         microchip IS NULL OR microchip = '' OR father IS NULL OR father = '' OR
         mother IS NULL OR mother = ''`),
-      pool.query(`SELECT COUNT(*) FROM dogtb WHERE comment ILIKE '%USA%'`)
+      pool.query(`SELECT COUNT(*) FROM dogtb WHERE comment ILIKE '%Location: USA%'`)
     ]);
 
     res.json({
