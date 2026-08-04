@@ -53,7 +53,7 @@
         <table>
           <thead>
             <tr>
-              <th>DogID</th><th>Breed</th><th>Dog Name</th><th>Nick Name</th><th>Gender</th>
+              <th>Photo</th><th>DogID</th><th>Breed</th><th>Dog Name</th><th>Nick Name</th><th>Gender</th>
               <th>DOB</th><th>Microchip</th><th>Father</th><th>Mother</th><th>Comments</th><th>Status</th><th></th>
             </tr>
           </thead>
@@ -81,6 +81,22 @@
     <div class="modal">
       <form id="dogForm">
         <input type="hidden" id="dogId">
+        <div class="field">
+          <label>Photo (optional)</label>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <img id="photoPreview" src="" alt="" style="width:64px; height:64px; border-radius:50%; object-fit:cover; background:rgba(255,255,255,0.2); display:none;">
+            <div id="photoPlaceholder" style="width:64px; height:64px; border-radius:50%; background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center;">
+              <i data-feather="camera" style="color:#fff; opacity:0.7;"></i>
+            </div>
+            <div style="flex:1;">
+              <input type="file" id="photoInput" accept="image/*" style="background:#fff; border-radius:8px; padding:8px;">
+              <div id="photoRemoveWrap" style="display:none; margin-top:6px;">
+                <button type="button" id="photoRemoveBtn" class="btn btn-secondary" style="padding:4px 10px; font-size:12px;">Remove photo</button>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="photoData">
+        </div>
         <div class="field"><label>Breed</label><input type="text" id="breed"></div>
         <div class="field"><label>Dog Name</label><input type="text" id="dogname"></div>
         <div class="field"><label>Nick Name</label><input type="text" id="nickname"></div>
@@ -182,7 +198,11 @@
       for (const d of dogs) {
         const tr = document.createElement('tr');
         const statusPill = `<span class="status-pill ${d.status}">${d.status}</span>`;
+        const photoCell = d.photo
+          ? `<img src="${d.photo}" alt="" style="width:34px; height:34px; border-radius:50%; object-fit:cover;">`
+          : `<div style="width:34px; height:34px; border-radius:50%; background:var(--blue-soft); display:flex; align-items:center; justify-content:center;"><i data-feather="camera-off" style="width:14px; height:14px; color:var(--blue);"></i></div>`;
         tr.innerHTML = `
+          <td>${photoCell}</td>
           <td>${d.dogid}</td><td>${d.breed || ''}</td><td>${d.dogname || ''}</td>
           <td>${d.nickname || ''}</td><td>${d.gender || ''}</td>
           <td>${d.dob ? new Date(d.dob).toLocaleDateString() : ''}</td>
@@ -229,8 +249,50 @@
 
     document.getElementById('searchInput').addEventListener('input', (e) => loadDogs(e.target.value));
 
+    const photoInput = document.getElementById('photoInput');
+    const photoPreview = document.getElementById('photoPreview');
+    const photoPlaceholder = document.getElementById('photoPlaceholder');
+    const photoData = document.getElementById('photoData');
+    const photoRemoveWrap = document.getElementById('photoRemoveWrap');
+    const photoRemoveBtn = document.getElementById('photoRemoveBtn');
+
+    function setPhotoPreview(dataUrl) {
+      if (dataUrl) {
+        photoPreview.src = dataUrl;
+        photoPreview.style.display = 'block';
+        photoPlaceholder.style.display = 'none';
+        photoRemoveWrap.style.display = 'block';
+        photoData.value = dataUrl;
+      } else {
+        photoPreview.src = '';
+        photoPreview.style.display = 'none';
+        photoPlaceholder.style.display = 'flex';
+        photoRemoveWrap.style.display = 'none';
+        photoData.value = '';
+      }
+    }
+
+    photoInput.addEventListener('change', () => {
+      const file = photoInput.files[0];
+      if (!file) return;
+      if (file.size > 4 * 1024 * 1024) {
+        alert('Please choose an image smaller than 4MB.');
+        photoInput.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => setPhotoPreview(reader.result);
+      reader.readAsDataURL(file);
+    });
+
+    photoRemoveBtn.addEventListener('click', () => {
+      photoInput.value = '';
+      setPhotoPreview(null);
+    });
+
     function openModal(dog = null) {
       dogForm.reset();
+      setPhotoPreview(dog && dog.photo ? dog.photo : null);
       document.getElementById('dogId').value = dog ? dog.dogid : '';
       if (dog) {
         document.getElementById('breed').value = dog.breed || '';
@@ -245,6 +307,7 @@
         document.getElementById('comment').value = dog.comment || '';
       }
       modalOverlay.classList.add('show');
+      feather.replace();
     }
     function closeModal() { modalOverlay.classList.remove('show'); }
 
@@ -255,6 +318,9 @@
     const viewModalBody = document.getElementById('viewModalBody');
 
     function openViewModal(dog) {
+      const photoHtml = dog.photo
+        ? `<img src="${dog.photo}" alt="" style="width:96px; height:96px; border-radius:50%; object-fit:cover; display:block; margin:0 auto 16px; box-shadow:0 6px 16px rgba(0,0,0,0.25);">`
+        : `<div style="width:96px; height:96px; border-radius:50%; background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; margin:0 auto 16px;"><i data-feather="camera-off" style="color:#fff; opacity:0.7;"></i></div>`;
       const rows = [
         ['DogID', dog.dogid],
         ['Breed', dog.breed],
@@ -267,7 +333,7 @@
         ['Mother', dog.mother],
         ['Status', dog.status]
       ];
-      viewModalBody.innerHTML = rows.map(([label, value]) => `
+      viewModalBody.innerHTML = photoHtml + rows.map(([label, value]) => `
         <div class="field">
           <label>${label}</label>
           <div style="background:rgba(255,255,255,0.92); border-radius:8px; padding:10px 14px; font-size:14px; color:var(--text); min-height:20px;">
@@ -283,6 +349,7 @@
         </div>
       `;
       viewModalOverlay.classList.add('show');
+      feather.replace();
     }
     document.getElementById('viewCloseBtn').addEventListener('click', () => viewModalOverlay.classList.remove('show'));
 
@@ -331,7 +398,8 @@
         father: document.getElementById('father').value,
         mother: document.getElementById('mother').value,
         status: document.getElementById('status').value,
-        comment: document.getElementById('comment').value
+        comment: document.getElementById('comment').value,
+        photo: document.getElementById('photoData').value || null
       };
       try {
         if (id) {

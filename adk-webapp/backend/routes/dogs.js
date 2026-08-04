@@ -29,13 +29,13 @@ router.get('/', async (req, res) => {
 
 // POST /api/dogs  -- any logged-in user (admin or not) can add
 router.post('/', async (req, res) => {
-  const { breed, dogname, nickname, gender, dob, microchip, father, mother, comment, status } = req.body;
+  const { breed, dogname, nickname, gender, dob, microchip, father, mother, comment, status, photo } = req.body;
   try {
     const result = await pool.query(
-      `INSERT INTO dogtb (breed, dogname, nickname, gender, dob, microchip, father, mother, comment, status)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,COALESCE($10,'active'))
+      `INSERT INTO dogtb (breed, dogname, nickname, gender, dob, microchip, father, mother, comment, status, photo)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,COALESCE($10,'active'),$11)
        RETURNING *`,
-      [breed, dogname, nickname, gender, dob || null, microchip, father, mother, comment, status]
+      [breed, dogname, nickname, gender, dob || null, microchip, father, mother, comment, status, photo || null]
     );
     res.status(201).json({ dog: result.rows[0] });
   } catch (err) {
@@ -47,13 +47,13 @@ router.post('/', async (req, res) => {
 // PUT /api/dogs/:id  -- admin only
 router.put('/:id', requireAdmin, async (req, res) => {
   const { id } = req.params;
-  const { breed, dogname, nickname, gender, dob, microchip, father, mother, comment, status } = req.body;
+  const { breed, dogname, nickname, gender, dob, microchip, father, mother, comment, status, photo } = req.body;
   try {
     const result = await pool.query(
       `UPDATE dogtb SET breed=$1, dogname=$2, nickname=$3, gender=$4, dob=$5,
-       microchip=$6, father=$7, mother=$8, comment=$9, status=$10
-       WHERE dogid=$11 RETURNING *`,
-      [breed, dogname, nickname, gender, dob || null, microchip, father, mother, comment, status || 'active', id]
+       microchip=$6, father=$7, mother=$8, comment=$9, status=$10, photo=$11
+       WHERE dogid=$12 RETURNING *`,
+      [breed, dogname, nickname, gender, dob || null, microchip, father, mother, comment, status || 'active', photo || null, id]
     );
     if (!result.rows.length) return res.status(404).json({ error: 'Dog not found.' });
     res.json({ dog: result.rows[0] });
