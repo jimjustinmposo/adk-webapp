@@ -445,6 +445,50 @@ td.actions button { padding: 6px 11px; font-size: 12px; gap: 5px; }
 .modal-actions { display: flex; gap: 12px; margin-top: 8px; }
 .modal-actions .btn { flex: 1; }
 
+/* View Details modal: photo on the left, fields on the right */
+.modal-view-wrap { max-width: 780px; }
+.modal-view-row {
+  display: flex;
+  gap: 26px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+.view-photo-col {
+  flex: 0 0 220px;
+  position: sticky;
+  top: 0;
+}
+.view-photo-col img {
+  width: 220px;
+  height: 220px;
+  border-radius: 18px;
+  object-fit: cover;
+  box-shadow: 0 14px 30px rgba(0,0,0,0.32);
+  display: block;
+}
+.view-photo-col .photo-placeholder {
+  width: 220px;
+  height: 220px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.view-fields-col {
+  flex: 1;
+  min-width: 0;
+  max-height: 62vh;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+@media (max-width: 720px) {
+  .modal-view-row { flex-direction: column; align-items: center; }
+  .view-photo-col { position: static; }
+  .view-fields-col { max-height: none; width: 100%; }
+}
+
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-4px);} 75%{transform:translateX(4px);} }

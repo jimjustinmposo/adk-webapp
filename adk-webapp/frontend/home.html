@@ -66,8 +66,11 @@
 
   <!-- View Details Modal (read-only, shows full text incl. long comments) -->
   <div class="modal-overlay" id="viewModalOverlay">
-    <div class="modal">
-      <div id="viewModalBody"></div>
+    <div class="modal modal-view-wrap">
+      <div class="modal-view-row">
+        <div class="view-photo-col" id="viewPhotoCol"></div>
+        <div class="view-fields-col" id="viewFieldsCol"></div>
+      </div>
       <div class="modal-actions">
         <button type="button" class="btn btn-secondary" id="viewCloseBtn" style="flex:none; width:100%;">
           <i data-feather="x"></i> Close
@@ -315,12 +318,11 @@
     document.getElementById('cancelBtn').addEventListener('click', closeModal);
 
     const viewModalOverlay = document.getElementById('viewModalOverlay');
-    const viewModalBody = document.getElementById('viewModalBody');
 
     function openViewModal(dog) {
       const photoHtml = dog.photo
-        ? `<img src="${dog.photo}" alt="" style="width:96px; height:96px; border-radius:50%; object-fit:cover; display:block; margin:0 auto 16px; box-shadow:0 6px 16px rgba(0,0,0,0.25);">`
-        : `<div style="width:96px; height:96px; border-radius:50%; background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; margin:0 auto 16px;"><i data-feather="camera-off" style="color:#fff; opacity:0.7;"></i></div>`;
+        ? `<img src="${dog.photo}" alt="">`
+        : `<div class="photo-placeholder"><i data-feather="camera-off" style="width:32px; height:32px; color:#fff; opacity:0.7;"></i></div>`;
       const rows = [
         ['DogID', dog.dogid],
         ['Breed', dog.breed],
@@ -333,7 +335,8 @@
         ['Mother', dog.mother],
         ['Status', dog.status]
       ];
-      viewModalBody.innerHTML = photoHtml + rows.map(([label, value]) => `
+      document.getElementById('viewPhotoCol').innerHTML = photoHtml;
+      document.getElementById('viewFieldsCol').innerHTML = rows.map(([label, value]) => `
         <div class="field">
           <label>${label}</label>
           <div style="background:rgba(255,255,255,0.92); border-radius:8px; padding:10px 14px; font-size:14px; color:var(--text); min-height:20px;">
