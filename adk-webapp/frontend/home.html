@@ -128,6 +128,7 @@
     const statusFilter = urlParams.get('status');   // 'active' | 'deceased'
     const missingFilter = urlParams.get('filter');   // 'missing'
     const sortBy = urlParams.get('sort');            // 'breed' | 'gender'
+    const locationFilter = urlParams.get('location'); // 'usa'
 
     function isMissingInfo(d) {
       const req = [d.breed, d.dogname, d.gender, d.dob, d.microchip, d.father, d.mother];
@@ -138,6 +139,7 @@
       let result = dogs;
       if (statusFilter) result = result.filter(d => d.status === statusFilter);
       if (missingFilter === 'missing') result = result.filter(isMissingInfo);
+      if (locationFilter === 'usa') result = result.filter(d => (d.comment || '').toLowerCase().includes('usa'));
       if (sortBy === 'breed') result = [...result].sort((a, b) => (a.breed || '').localeCompare(b.breed || ''));
       if (sortBy === 'gender') result = [...result].sort((a, b) => (a.gender || '').localeCompare(b.gender || ''));
       return result;
@@ -149,6 +151,7 @@
       if (statusFilter === 'active') label = 'Showing: Active Dogs';
       else if (statusFilter === 'deceased') label = 'Showing: Deceased Dogs';
       else if (missingFilter === 'missing') label = 'Showing: Dogs With Missing Information';
+      else if (locationFilter === 'usa') label = 'Showing: Dogs in USA';
       else if (sortBy === 'breed') label = 'Sorted by: Breed';
       else if (sortBy === 'gender') label = 'Sorted by: Gender';
 

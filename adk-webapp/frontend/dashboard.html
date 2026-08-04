@@ -82,6 +82,12 @@
           <div class="stat-value" id="statMissing">—</div>
         </a>
 
+        <a class="stat-card pop" href="home.html?location=usa">
+          <i class="stat-icon" data-feather="flag"></i>
+          <div class="stat-label">Dogs in USA</div>
+          <div class="stat-value" id="statUSA">—</div>
+        </a>
+
       </div>
     </main>
   </div>
@@ -99,6 +105,7 @@
         document.getElementById('statActive').textContent = stats.activeDogs;
         document.getElementById('statDeceased').textContent = stats.deceasedDogs;
         document.getElementById('statMissing').textContent = stats.dogsWithMissingInfo;
+        document.getElementById('statUSA').textContent = stats.dogsInUSA;
 
         const breedText = stats.dogsByBreed.length
           ? stats.dogsByBreed.map(b => `${b.breed}: ${b.count}`).join(' · ')
