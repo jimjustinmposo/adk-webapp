@@ -139,7 +139,15 @@
           <select id="status">
             <option value="active">Active</option>
             <option value="deceased">Deceased</option>
+            <option value="sold">Sold</option>
+            <option value="adopted">Adopted</option>
           </select>
+        </div>
+        <div id="dispositionFields" style="display:none;">
+          <div class="field"><label id="dispositionDateLabel">Date Sold</label><input type="date" id="dispositionDate"></div>
+          <div class="field"><label id="dispositionNameLabel">Buyer's Name</label><input type="text" id="dispositionName"></div>
+          <div class="field"><label id="dispositionAddressLabel">Buyer's Address</label><textarea id="dispositionAddress" rows="2"></textarea></div>
+          <div class="field"><label id="dispositionContactLabel">Buyer's Contact Details</label><input type="text" id="dispositionContact"></div>
         </div>
         <div class="field"><label>Comments</label><textarea id="comment" rows="3"></textarea></div>
         <div class="modal-actions">
@@ -160,6 +168,22 @@
     const emptyState = document.getElementById('emptyState');
     const modalOverlay = document.getElementById('modalOverlay');
     const dogForm = document.getElementById('dogForm');
+    const statusInput = document.getElementById('status');
+
+    function updateDispositionFields() {
+      const isSold = statusInput.value === 'sold';
+      const isAdopted = statusInput.value === 'adopted';
+      document.getElementById('dispositionFields').style.display = (isSold || isAdopted) ? 'block' : 'none';
+      const person = isSold ? "Buyer" : "Adopter";
+      document.getElementById('dispositionDateLabel').textContent = isSold ? 'Date Sold' : 'Date Adopted';
+      document.getElementById('dispositionNameLabel').textContent = `${person}'s Name`;
+      document.getElementById('dispositionAddressLabel').textContent = `${person}'s Address`;
+      document.getElementById('dispositionContactLabel').textContent = `${person}'s Contact Details`;
+      ['dispositionDate', 'dispositionName', 'dispositionAddress', 'dispositionContact'].forEach(id => {
+        document.getElementById(id).required = isSold || isAdopted;
+      });
+    }
+    statusInput.addEventListener('change', updateDispositionFields);
 
     // Read filter params passed from dashboard card links
     const urlParams = new URLSearchParams(window.location.search);
@@ -436,8 +460,13 @@
         document.getElementById('father').value = dog.father || '';
         document.getElementById('mother').value = dog.mother || '';
         document.getElementById('status').value = dog.status || 'active';
+        document.getElementById('dispositionDate').value = dog.disposition_date ? dog.disposition_date.substring(0, 10) : '';
+        document.getElementById('dispositionName').value = dog.disposition_contact_name || '';
+        document.getElementById('dispositionAddress').value = dog.disposition_contact_address || '';
+        document.getElementById('dispositionContact').value = dog.disposition_contact_details || '';
         document.getElementById('comment').value = dog.comment || '';
       }
+      updateDispositionFields();
       modalOverlay.classList.add('show');
       feather.replace();
     }
@@ -464,6 +493,15 @@
         ['Mother', dog.mother],
         ['Status', dog.status]
       ];
+      if (dog.status === 'sold' || dog.status === 'adopted') {
+        const person = dog.status === 'sold' ? 'Buyer' : 'Adopter';
+        rows.push(
+          [dog.status === 'sold' ? 'Date Sold' : 'Date Adopted', dog.disposition_date ? new Date(dog.disposition_date).toLocaleDateString() : ''],
+          [`${person}'s Name`, dog.disposition_contact_name],
+          [`${person}'s Address`, dog.disposition_contact_address],
+          [`${person}'s Contact Details`, dog.disposition_contact_details]
+        );
+      }
       document.getElementById('viewPhotoCol').innerHTML = photoHtml;
       document.getElementById('viewFieldsCol').innerHTML = rows.map(([label, value]) => `
         <div class="field">
@@ -530,6 +568,10 @@
         father: document.getElementById('father').value,
         mother: document.getElementById('mother').value,
         status: document.getElementById('status').value,
+        disposition_date: document.getElementById('dispositionDate').value || null,
+        disposition_contact_name: document.getElementById('dispositionName').value,
+        disposition_contact_address: document.getElementById('dispositionAddress').value,
+        disposition_contact_details: document.getElementById('dispositionContact').value,
         comment: document.getElementById('comment').value,
         photo: document.getElementById('photoData').value || null
       };

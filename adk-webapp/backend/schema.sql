@@ -24,9 +24,21 @@ CREATE TABLE IF NOT EXISTS dogtb (
     mother        VARCHAR(100),
     comment       TEXT,
     status        VARCHAR(20) NOT NULL DEFAULT 'active', -- 'active' or 'deceased'
+    photo         TEXT,
     created_at    TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
--- Note: I added a `status` column to dogtb (active/deceased) since the
--- dashboard needs it for the "Active Dogs" / "Deceased Dogs" cards and it
--- wasn't in your original table screenshot.
+-- Kept separately so a dog's usual record stays independent of a sale or adoption.
+CREATE TABLE IF NOT EXISTS dog_status_details (
+    dogid               INTEGER PRIMARY KEY REFERENCES dogtb(dogid) ON DELETE CASCADE,
+    disposition_type    VARCHAR(20) NOT NULL CHECK (disposition_type IN ('sold', 'adopted')),
+    disposition_date    DATE NOT NULL,
+    contact_name        VARCHAR(150) NOT NULL,
+    contact_address     TEXT NOT NULL,
+    contact_details     TEXT NOT NULL,
+    created_at          TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- Supports databases created with an earlier version of this schema.
+ALTER TABLE dogtb ADD COLUMN IF NOT EXISTS photo TEXT;

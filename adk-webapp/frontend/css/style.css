@@ -409,6 +409,8 @@ td.actions button { padding: 6px 11px; font-size: 12px; gap: 5px; }
 }
 .status-pill.active { background: #e6f6ec; color: #1a7f42; }
 .status-pill.deceased { background: #f1f2f4; color: #6b7280; }
+.status-pill.sold { background: #e8f0ff; color: #2458a6; }
+.status-pill.adopted { background: #fff2df; color: #a85a00; }
 .status-pill::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 
 .truncate-cell {
