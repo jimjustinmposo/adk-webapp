@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Alpha Delta Kennel — Reports</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="css/style.css">
+<script src="https://unpkg.com/feather-icons"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-profile fade-in"><div class="sidebar-avatar"><i data-feather="user"></i></div><div><div class="sidebar-name" id="sidebarName">Welcome</div><div class="sidebar-role" id="sidebarRole"></div></div></div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html"><i data-feather="grid"></i> Dashboard</a>
+        <a href="home.html"><i data-feather="list"></i> Dogs</a>
+        <a href="sold.html"><i data-feather="tag"></i> Sold</a>
+        <a href="adopted.html"><i data-feather="heart"></i> Adopted</a>
+        <a href="report.html" class="active"><i data-feather="file-text"></i> Reports</a>
+      </nav>
+      <button class="sidebar-logout" onclick="logout()"><i data-feather="log-out"></i> Log out</button>
+    </aside>
+    <main class="main fade-in-up">
+      <h2 class="page-title"><i data-feather="file-text"></i> Kennel Reports</h2>
+      <div class="toolbar">
+        <div style="color:var(--muted); font-size:14px;" id="reportDate"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-secondary" id="excelBtn" style="width:auto;"><i data-feather="file"></i> Export Excel</button>
+          <button class="btn btn-primary" id="pdfBtn" style="width:auto;"><i data-feather="download"></i> Export PDF</button>
+        </div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card pop"><i class="stat-icon" data-feather="hash"></i><div class="stat-label">Total Dogs</div><div class="stat-value" id="totalDogs">—</div></div>
+        <div class="stat-card pop"><i class="stat-icon" data-feather="heart"></i><div class="stat-label">Active Dogs</div><div class="stat-value" id="activeDogs">—</div></div>
+        <div class="stat-card pop"><i class="stat-icon" data-feather="x-circle"></i><div class="stat-label">Deceased Dogs</div><div class="stat-value" id="deceasedDogs">—</div></div>
+        <div class="stat-card pop"><i class="stat-icon" data-feather="tag"></i><div class="stat-label">Sold Dogs</div><div class="stat-value" id="soldDogs">—</div></div>
+        <div class="stat-card pop"><i class="stat-icon" data-feather="home"></i><div class="stat-label">Adopted Dogs</div><div class="stat-value" id="adoptedDogs">—</div></div>
+        <div class="stat-card pop"><i class="stat-icon" data-feather="dollar-sign"></i><div class="stat-label">Total Sales</div><div class="stat-value" id="totalSales">—</div></div>
+        <div class="stat-card pop"><i class="stat-icon" data-feather="alert-triangle"></i><div class="stat-label">Missing Information</div><div class="stat-value" id="missingDogs">—</div></div>
+        <div class="stat-card pop"><i class="stat-icon" data-feather="flag"></i><div class="stat-label">Dogs in USA</div><div class="stat-value" id="usaDogs">—</div></div>
+      </div>
+      <div class="table-wrap" style="margin-top:24px;"><table><thead><tr><th>Dashboard Breakdown</th><th>Details</th></tr></thead><tbody id="breakdownBody"></tbody></table></div>
+    </main>
+  </div>
+  <script src="js/api.js"></script>
+  <script>
+    requireLogin(); renderSidebarProfile();
+    let report = null, dogs = [];
+    const money = value => `${new Intl.NumberFormat('en-AE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(value || 0))} AED`;
+    const dateText = value => value ? new Date(`${value.substring(0, 10)}T00:00:00`).toLocaleDateString() : '';
+    function addBreakdown(label, details) { const row = document.createElement('tr'); [label, details].forEach(value => { const cell = document.createElement('td'); cell.textContent = value; row.appendChild(cell); }); document.getElementById('breakdownBody').appendChild(row); }
+    async function loadReport() {
+      try {
+        const [stats, dogData] = await Promise.all([apiRequest('/dashboard/stats'), apiRequest('/dogs')]);
+        report = stats; dogs = dogData.dogs;
+        const sold = dogs.filter(dog => dog.status === 'sold'); const adopted = dogs.filter(dog => dog.status === 'adopted');
+        const sales = sold.reduce((total, dog) => total + Number(dog.sale_amount || 0), 0);
+        document.getElementById('reportDate').textContent = `Generated: ${new Date().toLocaleString()}`;
+        const values = { totalDogs: stats.totalDogs, activeDogs: stats.activeDogs, deceasedDogs: stats.deceasedDogs, soldDogs: sold.length, adoptedDogs: adopted.length, totalSales: money(sales), missingDogs: stats.dogsWithMissingInfo, usaDogs: stats.dogsInUSA };
+        Object.entries(values).forEach(([id, value]) => document.getElementById(id).textContent = value);
+        const body = document.getElementById('breakdownBody'); body.innerHTML = '';
+        addBreakdown('Dogs by Breed', stats.dogsByBreed.map(item => `${item.breed}: ${item.count}`).join(' • ') || 'None');
+        addBreakdown('Dogs by Gender', stats.dogsByGender.map(item => `${item.gender}: ${item.count}`).join(' • ') || 'None');
+      } catch (error) { alert(error.message); }
+    }
+    function summaryRows() {
+      const sold = dogs.filter(dog => dog.status === 'sold'), adopted = dogs.filter(dog => dog.status === 'adopted');
+      return [['Report Generated', new Date().toLocaleString()], ['Total Dogs', report.totalDogs], ['Active Dogs', report.activeDogs], ['Deceased Dogs', report.deceasedDogs], ['Sold Dogs', sold.length], ['Adopted Dogs', adopted.length], ['Total Sales', money(sold.reduce((total, dog) => total + Number(dog.sale_amount || 0), 0))], ['Missing Information', report.dogsWithMissingInfo], ['Dogs in USA', report.dogsInUSA], ['Dogs by Breed', report.dogsByBreed.map(item => `${item.breed}: ${item.count}`).join(', ')], ['Dogs by Gender', report.dogsByGender.map(item => `${item.gender}: ${item.count}`).join(', ')]];
+    }
+    function exportExcel() {
+      if (!report) return;
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([['Alpha Delta Kennel Report'], [], ...summaryRows()]), 'Summary');
+      const soldRows = [['DogID', 'Dog Name', 'Breed', 'Date Sold', 'Buyer', 'Address', 'Contact', 'Unit Price (AED)'], ...dogs.filter(dog => dog.status === 'sold').map(dog => [dog.dogid, dog.dogname, dog.breed, dateText(dog.disposition_date), dog.disposition_contact_name, dog.disposition_contact_address, dog.disposition_contact_details, Number(dog.sale_amount || 0)])];
+      const adoptedRows = [['DogID', 'Dog Name', 'Breed', 'Date Adopted', 'Adopter', 'Address', 'Contact'], ...dogs.filter(dog => dog.status === 'adopted').map(dog => [dog.dogid, dog.dogname, dog.breed, dateText(dog.disposition_date), dog.disposition_contact_name, dog.disposition_contact_address, dog.disposition_contact_details])];
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(soldRows), 'Sold Dogs'); XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(adoptedRows), 'Adopted Dogs');
+      XLSX.writeFile(workbook, 'alpha-delta-kennel-report.xlsx');
+    }
+    function exportPdf() {
+      if (!report) return;
+      const { jsPDF } = window.jspdf; const pdf = new jsPDF();
+      pdf.setFontSize(18); pdf.text('Alpha Delta Kennel Report', 14, 18); pdf.setFontSize(10); pdf.text(`Generated: ${new Date().toLocaleString()}`, 14, 25);
+      pdf.autoTable({ startY: 31, head: [['Metric', 'Value']], body: summaryRows().slice(1), theme: 'grid', headStyles: { fillColor: [37, 88, 166] } });
+      const sold = dogs.filter(dog => dog.status === 'sold'); const adopted = dogs.filter(dog => dog.status === 'adopted');
+      pdf.addPage(); pdf.setFontSize(15); pdf.text('Sold Dogs', 14, 16); pdf.autoTable({ startY: 21, head: [['Dog', 'Breed', 'Date Sold', 'Buyer', 'Price']], body: sold.map(dog => [dog.dogname || '', dog.breed || '', dateText(dog.disposition_date), dog.disposition_contact_name || '', money(dog.sale_amount)]), theme: 'grid', headStyles: { fillColor: [37, 88, 166] } });
+      pdf.addPage(); pdf.setFontSize(15); pdf.text('Adopted Dogs', 14, 16); pdf.autoTable({ startY: 21, head: [['Dog', 'Breed', 'Date Adopted', 'Adopter', 'Contact']], body: adopted.map(dog => [dog.dogname || '', dog.breed || '', dateText(dog.disposition_date), dog.disposition_contact_name || '', dog.disposition_contact_details || '']), theme: 'grid', headStyles: { fillColor: [37, 88, 166] } });
+      pdf.save('alpha-delta-kennel-report.pdf');
+    }
+    document.getElementById('excelBtn').addEventListener('click', exportExcel); document.getElementById('pdfBtn').addEventListener('click', exportPdf);
+    loadReport(); feather.replace();
+  </script>
+</body>
+</html>
