@@ -27,6 +27,12 @@
         <a href="home.html" class="active">
           <i data-feather="list"></i> Dogs
         </a>
+        <a href="sold.html">
+          <i data-feather="tag"></i> Sold
+        </a>
+        <a href="adopted.html">
+          <i data-feather="heart"></i> Adopted
+        </a>
       </nav>
       <button class="sidebar-logout" onclick="logout()">
         <i data-feather="log-out"></i> Log out
@@ -145,6 +151,7 @@
         </div>
         <div id="dispositionFields" style="display:none;">
           <div class="field"><label id="dispositionDateLabel">Date Sold</label><input type="date" id="dispositionDate"></div>
+          <div class="field" id="saleAmountField"><label>Unit Price (AED)</label><input type="text" inputmode="decimal" id="saleAmount" placeholder="0.00 AED"></div>
           <div class="field"><label id="dispositionNameLabel">Buyer's Name</label><input type="text" id="dispositionName"></div>
           <div class="field"><label id="dispositionAddressLabel">Buyer's Address</label><textarea id="dispositionAddress" rows="2"></textarea></div>
           <div class="field"><label id="dispositionContactLabel">Buyer's Contact Details</label><input type="text" id="dispositionContact"></div>
@@ -170,10 +177,18 @@
     const dogForm = document.getElementById('dogForm');
     const statusInput = document.getElementById('status');
 
+    function formatAedAmount(value) {
+      const amount = Number(String(value ?? '').replace(/[^0-9.]/g, ''));
+      if (!Number.isFinite(amount)) return '';
+      return `${new Intl.NumberFormat('en-AE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount)} AED`;
+    }
+
     function updateDispositionFields() {
       const isSold = statusInput.value === 'sold';
       const isAdopted = statusInput.value === 'adopted';
       document.getElementById('dispositionFields').style.display = (isSold || isAdopted) ? 'block' : 'none';
+      document.getElementById('saleAmountField').style.display = isSold ? 'block' : 'none';
+      document.getElementById('saleAmount').required = isSold;
       const person = isSold ? "Buyer" : "Adopter";
       document.getElementById('dispositionDateLabel').textContent = isSold ? 'Date Sold' : 'Date Adopted';
       document.getElementById('dispositionNameLabel').textContent = `${person}'s Name`;
@@ -461,6 +476,8 @@
         document.getElementById('mother').value = dog.mother || '';
         document.getElementById('status').value = dog.status || 'active';
         document.getElementById('dispositionDate').value = dog.disposition_date ? dog.disposition_date.substring(0, 10) : '';
+        document.getElementById('saleAmount').value = dog.sale_amount !== null && dog.sale_amount !== undefined
+          ? formatAedAmount(dog.sale_amount) : '';
         document.getElementById('dispositionName').value = dog.disposition_contact_name || '';
         document.getElementById('dispositionAddress').value = dog.disposition_contact_address || '';
         document.getElementById('dispositionContact').value = dog.disposition_contact_details || '';
@@ -497,6 +514,7 @@
         const person = dog.status === 'sold' ? 'Buyer' : 'Adopter';
         rows.push(
           [dog.status === 'sold' ? 'Date Sold' : 'Date Adopted', dog.disposition_date ? new Date(dog.disposition_date).toLocaleDateString() : ''],
+          ...(dog.status === 'sold' ? [['Unit Price', formatAedAmount(dog.sale_amount)]] : []),
           [`${person}'s Name`, dog.disposition_contact_name],
           [`${person}'s Address`, dog.disposition_contact_address],
           [`${person}'s Contact Details`, dog.disposition_contact_details]
@@ -569,6 +587,7 @@
         mother: document.getElementById('mother').value,
         status: document.getElementById('status').value,
         disposition_date: document.getElementById('dispositionDate').value || null,
+        sale_amount: document.getElementById('saleAmount').value.replace(/[^0-9.]/g, ''),
         disposition_contact_name: document.getElementById('dispositionName').value,
         disposition_contact_address: document.getElementById('dispositionAddress').value,
         disposition_contact_details: document.getElementById('dispositionContact').value,
@@ -586,6 +605,10 @@
       } catch (err) {
         alert(err.message);
       }
+    });
+
+    document.getElementById('saleAmount').addEventListener('blur', (e) => {
+      if (e.target.value.trim()) e.target.value = formatAedAmount(e.target.value);
     });
 
     renderFilterChip();

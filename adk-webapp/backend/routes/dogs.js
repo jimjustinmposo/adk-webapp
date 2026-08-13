@@ -5,7 +5,7 @@ const { verifyToken, requireAdmin } = require('../middleware/auth');
 const router = express.Router();
 router.use(verifyToken); // every dog route requires login
 
-const DOG_SELECT = `SELECT d.*, sd.disposition_date, sd.contact_name AS disposition_contact_name,
+const DOG_SELECT = `SELECT d.*, sd.disposition_date, sd.sale_amount, sd.contact_name AS disposition_contact_name,
   sd.contact_address AS disposition_contact_address, sd.contact_details AS disposition_contact_details
   FROM dogtb d
   LEFT JOIN dog_status_details sd ON sd.dogid = d.dogid`;
@@ -19,12 +19,16 @@ function getDispositionDetails(body) {
 
   const details = {
     date: body.disposition_date,
+    amount: body.sale_amount,
     name: (body.disposition_contact_name || '').trim(),
     address: (body.disposition_contact_address || '').trim(),
     contact: (body.disposition_contact_details || '').trim()
   };
   if (!details.date || !details.name || !details.address || !details.contact) {
     throw new Error(`Complete ${status === 'sold' ? 'buyer' : 'adopter'} details are required.`);
+  }
+  if (status === 'sold' && (details.amount === '' || details.amount === null || details.amount === undefined || Number.isNaN(Number(details.amount)) || Number(details.amount) < 0)) {
+    throw new Error('A valid sale amount is required.');
   }
   return { status, details };
 }
@@ -34,9 +38,9 @@ async function saveDispositionDetails(client, dogid, status, details) {
   if (!details) return;
   await client.query(
     `INSERT INTO dog_status_details
-      (dogid, disposition_type, disposition_date, contact_name, contact_address, contact_details)
-     VALUES ($1,$2,$3,$4,$5,$6)`,
-    [dogid, status, details.date, details.name, details.address, details.contact]
+      (dogid, disposition_type, disposition_date, sale_amount, contact_name, contact_address, contact_details)
+     VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+    [dogid, status, details.date, status === 'sold' ? details.amount : null, details.name, details.address, details.contact]
   );
 }
 

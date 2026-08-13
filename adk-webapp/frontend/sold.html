@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Alpha Delta Kennel — Sold Dogs</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="css/style.css">
+<script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-profile fade-in">
+        <div class="sidebar-avatar"><i data-feather="user"></i></div>
+        <div><div class="sidebar-name" id="sidebarName">Welcome</div><div class="sidebar-role" id="sidebarRole"></div></div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html"><i data-feather="grid"></i> Dashboard</a>
+        <a href="home.html"><i data-feather="list"></i> Dogs</a>
+        <a href="sold.html" class="active"><i data-feather="tag"></i> Sold</a>
+        <a href="adopted.html"><i data-feather="heart"></i> Adopted</a>
+      </nav>
+      <button class="sidebar-logout" onclick="logout()"><i data-feather="log-out"></i> Log out</button>
+    </aside>
+
+    <main class="main fade-in-up">
+      <h2 class="page-title"><i data-feather="tag"></i> Sold Dogs</h2>
+      <div class="toolbar">
+        <div class="search-box"><i data-feather="search"></i><input id="searchInput" type="text" placeholder="Search sold dogs..."></div>
+        <button class="btn btn-primary" id="addSoldBtn" style="width:auto;"><i data-feather="tag"></i> Mark Dog as Sold</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Photo</th><th>DogID</th><th>Dog Name</th><th>Breed</th><th>Date Sold</th><th>Buyer</th><th>Unit Price</th><th>Contact Details</th></tr></thead>
+          <tbody id="soldTableBody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="emptyState" style="display:none;">No sold dogs found.</div>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <form id="soldForm">
+        <div class="field"><label>Search Dog Database</label><input id="dogSearch" type="search" list="dogOptions" placeholder="Type a dog's name, breed, or DogID" required><datalist id="dogOptions"></datalist></div>
+        <div id="selectedDogInfo" style="display:none; background:rgba(255,255,255,.15); color:#fff; border-radius:8px; padding:10px 14px; margin-bottom:16px;"></div>
+        <div class="field"><label>Date Sold</label><input id="dispositionDate" type="date" required></div>
+        <div class="field"><label>Unit Price (AED)</label><input id="saleAmount" type="text" inputmode="decimal" placeholder="0.00 AED" required></div>
+        <div class="field"><label>Buyer's Name</label><input id="buyerName" type="text" required></div>
+        <div class="field"><label>Buyer's Address</label><textarea id="buyerAddress" rows="2" required></textarea></div>
+        <div class="field"><label>Buyer's Contact Details</label><input id="buyerContact" type="text" required></div>
+        <div class="field"><label>Comments</label><textarea id="comment" rows="3"></textarea></div>
+        <div class="modal-actions"><button class="btn btn-secondary" type="button" id="cancelBtn">Cancel</button><button class="btn btn-primary" type="submit"><i data-feather="save"></i> Save Sale</button></div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    requireLogin(); renderSidebarProfile();
+    const tableBody = document.getElementById('soldTableBody');
+    const modal = document.getElementById('modalOverlay');
+    let soldDogs = [], availableDogs = [];
+
+    function formatAed(value) {
+      const amount = Number(String(value ?? '').replace(/[^0-9.]/g, ''));
+      return Number.isFinite(amount) ? `${new Intl.NumberFormat('en-AE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount)} AED` : '';
+    }
+    function dateText(value) { return value ? new Date(`${value.substring(0, 10)}T00:00:00`).toLocaleDateString() : ''; }
+    function render(dogs) {
+      tableBody.innerHTML = '';
+      document.getElementById('emptyState').style.display = dogs.length ? 'none' : 'block';
+      dogs.forEach(dog => {
+        const row = document.createElement('tr');
+        const photoCell = document.createElement('td');
+        if (dog.photo) {
+          const image = document.createElement('img'); image.src = dog.photo; image.alt = ''; image.style.cssText = 'width:34px;height:34px;border-radius:50%;object-fit:cover;'; photoCell.appendChild(image);
+        } else {
+          photoCell.innerHTML = '<div title="No dog photo" style="width:34px;height:34px;border-radius:50%;background:var(--blue-soft);display:flex;align-items:center;justify-content:center;"><i data-feather="camera-off" style="width:14px;height:14px;color:var(--blue);"></i></div>';
+        }
+        row.appendChild(photoCell);
+        [dog.dogid, dog.dogname, dog.breed, dateText(dog.disposition_date), dog.disposition_contact_name, formatAed(dog.sale_amount), dog.disposition_contact_details].forEach(value => {
+          const cell = document.createElement('td'); cell.textContent = value || ''; row.appendChild(cell);
+        });
+        tableBody.appendChild(row);
+      });
+      feather.replace();
+    }
+    async function loadSoldDogs() {
+      try {
+        const data = await apiRequest('/dogs');
+        soldDogs = data.dogs.filter(dog => dog.status === 'sold');
+        availableDogs = data.dogs.filter(dog => dog.status === 'active');
+        filterDogs();
+      } catch (error) { alert(error.message); }
+    }
+    function filterDogs() {
+      const term = document.getElementById('searchInput').value.toLowerCase();
+      render(soldDogs.filter(dog => [dog.dogname, dog.breed, dog.disposition_contact_name, dog.microchip].some(value => (value || '').toLowerCase().includes(term))));
+    }
+    document.getElementById('searchInput').addEventListener('input', filterDogs);
+    document.getElementById('addSoldBtn').addEventListener('click', () => {
+      document.getElementById('soldForm').reset();
+      document.getElementById('dogOptions').innerHTML = availableDogs.map(dog => `<option value="${dog.dogid}" label="${dog.dogname || 'Unnamed'}${dog.breed ? ` — ${dog.breed}` : ''}"></option>`).join('');
+      document.getElementById('selectedDogInfo').style.display = 'none';
+      modal.classList.add('show'); feather.replace();
+    });
+    document.getElementById('cancelBtn').addEventListener('click', () => modal.classList.remove('show'));
+    document.getElementById('dogSearch').addEventListener('input', event => {
+      const dog = availableDogs.find(item => String(item.dogid) === event.target.value);
+      const info = document.getElementById('selectedDogInfo');
+      if (!dog) { info.style.display = 'none'; return; }
+      info.textContent = `Selected: ${dog.dogname || 'Unnamed'}${dog.breed ? ` — ${dog.breed}` : ''}${dog.microchip ? ` | Microchip: ${dog.microchip}` : ''}`;
+      info.style.display = 'block';
+    });
+    document.getElementById('saleAmount').addEventListener('blur', event => { if (event.target.value.trim()) event.target.value = formatAed(event.target.value); });
+    document.getElementById('soldForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const value = id => document.getElementById(id).value;
+      const selectedDog = availableDogs.find(dog => String(dog.dogid) === value('dogSearch'));
+      if (!selectedDog) return alert('Please select a dog from the Dog Database.');
+      const body = {
+        breed: selectedDog.breed, dogname: selectedDog.dogname, nickname: selectedDog.nickname, gender: selectedDog.gender, dob: selectedDog.dob,
+        microchip: selectedDog.microchip, father: selectedDog.father, mother: selectedDog.mother, comment: value('comment') || selectedDog.comment, status: 'sold', photo: selectedDog.photo,
+        disposition_date: value('dispositionDate'), sale_amount: value('saleAmount').replace(/[^0-9.]/g, ''),
+        disposition_contact_name: value('buyerName'), disposition_contact_address: value('buyerAddress'), disposition_contact_details: value('buyerContact')
+      };
+      try { await apiRequest(`/dogs/${selectedDog.dogid}`, { method: 'PUT', body }); modal.classList.remove('show'); loadSoldDogs(); }
+      catch (error) { alert(error.message); }
+    });
+    loadSoldDogs(); feather.replace();
+  </script>
+</body>
+</html>
