@@ -74,8 +74,8 @@
       if (!report) return;
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([['Alpha Delta Kennel Report'], [], ...summaryRows()]), 'Summary');
-      const soldRows = [['DogID', 'Dog Name', 'Breed', 'Date Sold', 'Buyer', 'Address', 'Contact', 'Unit Price (AED)'], ...dogs.filter(dog => dog.status === 'sold').map(dog => [dog.dogid, dog.dogname, dog.breed, dateText(dog.disposition_date), dog.disposition_contact_name, dog.disposition_contact_address, dog.disposition_contact_details, Number(dog.sale_amount || 0)])];
-      const adoptedRows = [['DogID', 'Dog Name', 'Breed', 'Date Adopted', 'Adopter', 'Address', 'Contact'], ...dogs.filter(dog => dog.status === 'adopted').map(dog => [dog.dogid, dog.dogname, dog.breed, dateText(dog.disposition_date), dog.disposition_contact_name, dog.disposition_contact_address, dog.disposition_contact_details])];
+      const soldRows = [['DogID', 'Dog Name', 'Breed', 'Date Sold', 'Buyer', "Buyer's Address", 'Contact', 'Unit Price (AED)'], ...dogs.filter(dog => dog.status === 'sold').map(dog => [dog.dogid, dog.dogname, dog.breed, dateText(dog.disposition_date), dog.disposition_contact_name, dog.disposition_contact_address, dog.disposition_contact_details, Number(dog.sale_amount || 0)])];
+      const adoptedRows = [['DogID', 'Dog Name', 'Breed', 'Date Adopted', 'Adopter', "Adopter's Address", 'Contact'], ...dogs.filter(dog => dog.status === 'adopted').map(dog => [dog.dogid, dog.dogname, dog.breed, dateText(dog.disposition_date), dog.disposition_contact_name, dog.disposition_contact_address, dog.disposition_contact_details])];
       XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(soldRows), 'Sold Dogs'); XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(adoptedRows), 'Adopted Dogs');
       XLSX.writeFile(workbook, 'alpha-delta-kennel-report.xlsx');
     }
@@ -85,8 +85,8 @@
       pdf.setFontSize(18); pdf.text('Alpha Delta Kennel Report', 14, 18); pdf.setFontSize(10); pdf.text(`Generated: ${new Date().toLocaleString()}`, 14, 25);
       pdf.autoTable({ startY: 31, head: [['Metric', 'Value']], body: summaryRows().slice(1), theme: 'grid', headStyles: { fillColor: [37, 88, 166] } });
       const sold = dogs.filter(dog => dog.status === 'sold'); const adopted = dogs.filter(dog => dog.status === 'adopted');
-      pdf.addPage(); pdf.setFontSize(15); pdf.text('Sold Dogs', 14, 16); pdf.autoTable({ startY: 21, head: [['Dog', 'Breed', 'Date Sold', 'Buyer', 'Price']], body: sold.map(dog => [dog.dogname || '', dog.breed || '', dateText(dog.disposition_date), dog.disposition_contact_name || '', money(dog.sale_amount)]), theme: 'grid', headStyles: { fillColor: [37, 88, 166] } });
-      pdf.addPage(); pdf.setFontSize(15); pdf.text('Adopted Dogs', 14, 16); pdf.autoTable({ startY: 21, head: [['Dog', 'Breed', 'Date Adopted', 'Adopter', 'Contact']], body: adopted.map(dog => [dog.dogname || '', dog.breed || '', dateText(dog.disposition_date), dog.disposition_contact_name || '', dog.disposition_contact_details || '']), theme: 'grid', headStyles: { fillColor: [37, 88, 166] } });
+      pdf.addPage(); pdf.setFontSize(15); pdf.text('Sold Dogs', 14, 16); pdf.autoTable({ startY: 21, head: [['Dog', 'Breed', 'Date Sold', 'Buyer', "Buyer's Address", 'Price']], body: sold.map(dog => [dog.dogname || '', dog.breed || '', dateText(dog.disposition_date), dog.disposition_contact_name || '', dog.disposition_contact_address || '', money(dog.sale_amount)]), theme: 'grid', headStyles: { fillColor: [37, 88, 166] } });
+      pdf.addPage(); pdf.setFontSize(15); pdf.text('Adopted Dogs', 14, 16); pdf.autoTable({ startY: 21, head: [['Dog', 'Breed', 'Date Adopted', 'Adopter', "Adopter's Address", 'Contact']], body: adopted.map(dog => [dog.dogname || '', dog.breed || '', dateText(dog.disposition_date), dog.disposition_contact_name || '', dog.disposition_contact_address || '', dog.disposition_contact_details || '']), theme: 'grid', headStyles: { fillColor: [37, 88, 166] } });
       pdf.save('alpha-delta-kennel-report.pdf');
     }
     document.getElementById('excelBtn').addEventListener('click', exportExcel); document.getElementById('pdfBtn').addEventListener('click', exportPdf);

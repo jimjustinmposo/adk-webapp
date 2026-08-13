@@ -27,7 +27,7 @@
         <button class="btn btn-primary" id="addAdoptedBtn" style="width:auto;"><i data-feather="heart"></i> Mark Dog as Adopted</button>
       </div>
       <div class="table-wrap"><table>
-        <thead><tr><th>Photo</th><th>DogID</th><th>Dog Name</th><th>Breed</th><th>Date Adopted</th><th>Adopter</th><th>Contact Details</th></tr></thead>
+        <thead><tr><th>Photo</th><th>DogID</th><th>Dog Name</th><th>Breed</th><th>Date Adopted</th><th>Adopter</th><th>Adopter's Address</th><th>Contact Details</th></tr></thead>
         <tbody id="adoptedTableBody"></tbody>
       </table></div>
       <div class="empty-state" id="emptyState" style="display:none;">No adopted dogs found.</div>
@@ -55,7 +55,7 @@
         if (dog.photo) { const image = document.createElement('img'); image.src = dog.photo; image.alt = ''; image.style.cssText = 'width:34px;height:34px;border-radius:50%;object-fit:cover;'; photoCell.appendChild(image); }
         else { photoCell.innerHTML = '<div title="No dog photo" style="width:34px;height:34px;border-radius:50%;background:var(--blue-soft);display:flex;align-items:center;justify-content:center;"><i data-feather="camera-off" style="width:14px;height:14px;color:var(--blue);"></i></div>'; }
         row.appendChild(photoCell);
-        [dog.dogid, dog.dogname, dog.breed, dateText(dog.disposition_date), dog.disposition_contact_name, dog.disposition_contact_details].forEach(value => { const cell = document.createElement('td'); cell.textContent = value || ''; row.appendChild(cell); }); tableBody.appendChild(row);
+        [dog.dogid, dog.dogname, dog.breed, dateText(dog.disposition_date), dog.disposition_contact_name, dog.disposition_contact_address, dog.disposition_contact_details].forEach(value => { const cell = document.createElement('td'); cell.textContent = value || ''; row.appendChild(cell); }); tableBody.appendChild(row);
       }); feather.replace();
     }
     async function loadAdoptedDogs() { try { const data = await apiRequest('/dogs'); adoptedDogs = data.dogs.filter(dog => dog.status === 'adopted'); availableDogs = data.dogs.filter(dog => dog.status === 'active'); filterDogs(); } catch (error) { alert(error.message); } }

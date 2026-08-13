@@ -32,7 +32,7 @@
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Photo</th><th>DogID</th><th>Dog Name</th><th>Breed</th><th>Date Sold</th><th>Buyer</th><th>Unit Price</th><th>Contact Details</th></tr></thead>
+          <thead><tr><th>Photo</th><th>DogID</th><th>Dog Name</th><th>Breed</th><th>Date Sold</th><th>Buyer</th><th>Buyer's Address</th><th>Unit Price</th><th>Contact Details</th></tr></thead>
           <tbody id="soldTableBody"></tbody>
         </table>
       </div>
@@ -80,7 +80,7 @@
           photoCell.innerHTML = '<div title="No dog photo" style="width:34px;height:34px;border-radius:50%;background:var(--blue-soft);display:flex;align-items:center;justify-content:center;"><i data-feather="camera-off" style="width:14px;height:14px;color:var(--blue);"></i></div>';
         }
         row.appendChild(photoCell);
-        [dog.dogid, dog.dogname, dog.breed, dateText(dog.disposition_date), dog.disposition_contact_name, formatAed(dog.sale_amount), dog.disposition_contact_details].forEach(value => {
+        [dog.dogid, dog.dogname, dog.breed, dateText(dog.disposition_date), dog.disposition_contact_name, dog.disposition_contact_address, formatAed(dog.sale_amount), dog.disposition_contact_details].forEach(value => {
           const cell = document.createElement('td'); cell.textContent = value || ''; row.appendChild(cell);
         });
         tableBody.appendChild(row);
