@@ -16,9 +16,11 @@
   --teal-light: #eef4ff;
 }
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 html, body { height: 100%; }
+html { -webkit-text-size-adjust: 100%; }
+body { overflow-x: hidden; }
 
 body {
   margin: 0;
@@ -125,6 +127,7 @@ body {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  min-height: 44px;
   transition: transform 0.16s var(--ease), background 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
 }
 .btn [data-feather], .btn .icon { width: 15px; height: 15px; transition: transform 0.16s var(--ease); }
@@ -549,16 +552,93 @@ td.actions button { padding: 6px 11px; font-size: 12px; gap: 5px; }
 .empty-state { text-align: center; padding: 40px; color: var(--muted); }
 
 @media (max-width: 720px) {
+  /* --- App shell / navigation --- */
   .app-shell { flex-direction: column; }
-  .sidebar { width: 100%; height: auto; position: relative; flex-direction: row; align-items: center; padding: 14px 16px; }
-  .sidebar-nav { flex-direction: row; }
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 14px;
+    gap: 10px;
+  }
+  .sidebar-profile { margin-bottom: 0; flex-shrink: 0; }
+  .sidebar-avatar { width: 38px; height: 38px; }
+  .sidebar-name { font-size: 13px; }
+  .sidebar-role { display: none; }
+  .sidebar-nav {
+    flex-direction: row;
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 4px;
+  }
+  .sidebar-nav::-webkit-scrollbar { display: none; }
+  .sidebar-nav a {
+    flex-shrink: 0;
+    padding: 9px 12px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
   .sidebar-nav a.active::before { display: none; }
-  .sidebar-logout { margin-top: 0; margin-left: auto; }
-  .stat-grid { grid-template-columns: 1fr; }
-  .main { padding: 24px 20px; }
+  .sidebar-logout { flex-shrink: 0; padding: 10px 12px; margin-top: 0; }
+  .sidebar-logout span, .sidebar-logout { font-size: 0; gap: 0; }
+  .sidebar-logout [data-feather] { width: 18px; height: 18px; }
+
+  .main { padding: 20px 16px 32px; }
+  .main h2, .page-title { font-size: 19px; margin-bottom: 20px; }
+
+  /* --- Dashboard --- */
+  .stat-grid { grid-template-columns: 1fr; gap: 14px; }
+
+  /* --- Toolbar / search --- */
+  .toolbar { flex-direction: column; align-items: stretch; gap: 12px; }
+  .search-box { min-width: 0; max-width: none; width: 100%; padding: 11px 16px; }
+  .toolbar > .btn, .toolbar > button { width: 100%; }
+
+  /* --- Reports --- */
   .report-panel { grid-template-columns: 1fr; }
   .report-date { grid-column: auto; }
   .report-options { grid-template-columns: 1fr; }
   .report-export-grid { grid-template-columns: 1fr; }
   .excel-export-panel, .pdf-export-panel { align-items: flex-start; flex-direction: column; }
+
+  /* --- Tables: keep native horizontal scroll but make it comfortable --- */
+  .table-wrap, .table-scroll-top { -webkit-overflow-scrolling: touch; }
+  th, td { padding: 11px 12px; font-size: 12.5px; }
+  td.actions { flex-wrap: wrap; }
+
+  /* --- Modals: fit small screens, avoid edge-to-edge, keep actions reachable --- */
+  .modal-overlay { padding: 16px; align-items: flex-end; }
+  .modal-overlay.show { animation: fadeIn 0.18s var(--ease); }
+  .modal {
+    max-width: none;
+    width: 100%;
+    max-height: 85vh;
+    max-height: 85dvh;
+    padding: 22px 18px;
+    border-radius: 18px 18px 0 0;
+  }
+  .modal-actions { flex-direction: column-reverse; gap: 8px; }
+  .modal-actions .btn { width: 100%; }
+
+  /* Prevent iOS Safari from zooming in when a field is focused */
+  .field input, .field select, .field textarea { font-size: 16px; }
+
+  /* View-details modal already stacks via its own 720px rule above */
+}
+
+@media (max-width: 420px) {
+  .auth-card { padding: 28px 20px; }
+  .auth-logo-img { width: 72px; height: 72px; }
+  .modal { padding: 18px 14px; }
+  #cropStage { width: 180px !important; height: 180px !important; }
+  .view-photo-col, .view-photo-col img, .view-photo-col .photo-placeholder { width: 160px !important; height: 160px !important; }
+  .stat-card { min-height: 110px; padding: 16px; }
+  .stat-card .stat-value { font-size: 24px; }
 }
