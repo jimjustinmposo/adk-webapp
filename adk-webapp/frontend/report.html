@@ -7,6 +7,8 @@
 <link rel="stylesheet" href="css/style.css">
 <script src="https://unpkg.com/feather-icons"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -43,10 +45,16 @@
         <div id="reportOptions" class="report-options"></div>
       </section>
 
+      <div class="report-export-grid">
       <section class="excel-export-panel">
         <div class="excel-export-copy"><i data-feather="file-text"></i><div><h3>Export Excel report</h3><p id="exportHint">Choose a month and select the data to export.</p></div></div>
         <button class="btn btn-excel" id="excelBtn" disabled><i data-feather="download"></i> Export Excel</button>
       </section>
+      <section class="pdf-export-panel">
+        <div class="pdf-export-copy"><i data-feather="file-text"></i><div><h3>Export PDF report</h3><p>Export the selected report sections as a PDF.</p></div></div>
+        <button class="btn btn-pdf" id="pdfBtn" disabled><i data-feather="download"></i> Export PDF</button>
+      </section>
+      </div>
     </main>
   </div>
   <script src="js/api.js"></script>
@@ -59,6 +67,7 @@
     const availableData = document.getElementById('availableData');
     const reportOptions = document.getElementById('reportOptions');
     const excelBtn = document.getElementById('excelBtn');
+    const pdfBtn = document.getElementById('pdfBtn');
     const money = value => `${new Intl.NumberFormat('en-AE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(value || 0))} AED`;
     const dateText = value => value ? new Date(`${value.substring(0, 10)}T00:00:00`).toLocaleDateString() : '';
     const displayMonth = value => new Date(`${value}-01T00:00:00`).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -72,7 +81,8 @@
     function selectedOptions() { return [...document.querySelectorAll('.report-option input:checked')].map(input => input.value); }
     function updateExportState() {
       const count = selectedOptions().length;
-      excelBtn.disabled = (!monthInput.value && !isAllTime()) || !count;
+      const disabled = (!monthInput.value && !isAllTime()) || !count;
+      excelBtn.disabled = disabled; pdfBtn.disabled = disabled;
       document.getElementById('exportHint').textContent = count ? `${count} selected section${count === 1 ? '' : 's'} will be included.` : 'Select at least one report section to export.';
     }
     function option(id, title, description, value) {
@@ -116,13 +126,35 @@
       rowsForSelection(selected).forEach(([name, rows]) => XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(rows), name));
       XLSX.writeFile(workbook, `alpha-delta-kennel-report-${isAllTime() ? 'all-time' : monthInput.value}.xlsx`);
     }
+    function exportPdf() {
+      const selected = selectedOptions();
+      if ((!monthInput.value && !isAllTime()) || !selected.length) return;
+      const { jsPDF } = window.jspdf; const pdf = new jsPDF();
+      const sold = dogs.filter(dog => dog.status === 'sold' && matchesDispositionPeriod(dog));
+      const adopted = dogs.filter(dog => dog.status === 'adopted' && matchesDispositionPeriod(dog));
+      const registered = dogs.filter(matchesRegistrationPeriod);
+      const addSection = (title, head, body) => {
+        const isFirstSection = !pdf.lastAutoTable;
+        if (!isFirstSection) pdf.addPage();
+        pdf.setFontSize(15); pdf.text(title, 14, isFirstSection ? 36 : 18);
+        pdf.autoTable({ startY: isFirstSection ? 42 : 24, head: [head], body, theme: 'grid', headStyles: { fillColor: [185, 28, 28] }, styles: { fontSize: 8 } });
+      };
+      pdf.setFontSize(18); pdf.text('Alpha Delta Kennel Report', 14, 18);
+      pdf.setFontSize(10); pdf.text(`Report period: ${periodLabel()}`, 14, 25);
+      if (selected.includes('sales-summary')) addSection('Sales Summary', ['Metric', 'Value'], [['Dogs sold', sold.length], ['Total sales', money(sold.reduce((total, dog) => total + Number(dog.sale_amount || 0), 0))]]);
+      if (selected.includes('sold-dogs')) addSection('Sold Dogs', ['Dog', 'Breed', 'Date Sold', 'Buyer', 'Sale Amount'], sold.map(dog => [dog.dogname || '', dog.breed || '', dateText(dog.disposition_date), dog.disposition_contact_name || '', money(dog.sale_amount)]));
+      if (selected.includes('adoption-summary')) addSection('Adoption Summary', ['Metric', 'Value'], [['Dogs adopted', adopted.length]]);
+      if (selected.includes('adopted-dogs')) addSection('Adopted Dogs', ['Dog', 'Breed', 'Date Adopted', 'Adopter', 'Contact'], adopted.map(dog => [dog.dogname || '', dog.breed || '', dateText(dog.disposition_date), dog.disposition_contact_name || '', dog.disposition_contact_details || '']));
+      if (selected.includes('registered-dogs')) addSection('New Registrations', ['Dog', 'Breed', 'Gender', 'Date Added'], registered.map(dog => [dog.dogname || '', dog.breed || '', dog.gender || '', dateText(dog.created_at)]));
+      pdf.save(`alpha-delta-kennel-report-${isAllTime() ? 'all-time' : monthInput.value}.pdf`);
+    }
     document.getElementById('toggleAllBtn').addEventListener('click', event => {
       const inputs = [...reportOptions.querySelectorAll('input')], allSelected = inputs.every(input => input.checked);
       inputs.forEach(input => input.checked = !allSelected); event.currentTarget.textContent = allSelected ? 'Select all' : 'Clear all'; updateExportState();
     });
     monthInput.addEventListener('change', renderAvailableData);
     allTimeInput.addEventListener('change', () => { monthInput.disabled = allTimeInput.checked; renderAvailableData(); });
-    excelBtn.addEventListener('click', exportExcel);
+    excelBtn.addEventListener('click', exportExcel); pdfBtn.addEventListener('click', exportPdf);
     apiRequest('/dogs').then(data => { dogs = data.dogs; if (monthInput.value) renderAvailableData(); }).catch(error => { reportDate.textContent = error.message; });
     feather.replace();
   </script>
