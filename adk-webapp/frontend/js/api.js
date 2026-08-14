@@ -47,3 +47,31 @@ function renderSidebarProfile() {
   if (nameEl) nameEl.textContent = `Welcome ${user.nickname}`;
   if (roleEl) roleEl.textContent = user.adminrights ? 'Admin' : 'Not admin';
 }
+
+// Mobile hamburger menu: tap to reveal the nav links, tap a link (or tap
+// outside) to close it again. Runs on every page since api.js is shared.
+(function initMobileNav() {
+  const toggle = document.getElementById('menuToggle');
+  const sidebar = document.querySelector('.sidebar');
+  if (!toggle || !sidebar) return;
+
+  function setOpen(open) {
+    sidebar.classList.toggle('nav-open', open);
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setOpen(!sidebar.classList.contains('nav-open'));
+  });
+
+  sidebar.querySelectorAll('.sidebar-nav a').forEach(link => {
+    link.addEventListener('click', () => setOpen(false));
+  });
+
+  document.addEventListener('click', (e) => {
+    if (sidebar.classList.contains('nav-open') && !sidebar.contains(e.target)) {
+      setOpen(false);
+    }
+  });
+})();
