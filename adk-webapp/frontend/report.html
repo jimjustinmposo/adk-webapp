@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="css/style.css">
 <script src="https://unpkg.com/feather-icons"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 </head>
@@ -51,7 +51,7 @@
         <button class="btn btn-excel" id="excelBtn" disabled><i data-feather="download"></i> Export Excel</button>
       </section>
       <section class="pdf-export-panel">
-        <div class="pdf-export-copy"><i data-feather="file-text"></i><div><h3>Export PDF report</h3><p>Export the selected report sections as a PDF.</p></div></div>
+        <div class="pdf-export-copy"><i data-feather="file-text"></i><div><h3>Export PDF report</h3><p id="pdfExportHint">Choose a month and select the data to export.</p></div></div>
         <button class="btn btn-pdf" id="pdfBtn" disabled><i data-feather="download"></i> Export PDF</button>
       </section>
       </div>
@@ -83,7 +83,9 @@
       const count = selectedOptions().length;
       const disabled = (!monthInput.value && !isAllTime()) || !count;
       excelBtn.disabled = disabled; pdfBtn.disabled = disabled;
-      document.getElementById('exportHint').textContent = count ? `${count} selected section${count === 1 ? '' : 's'} will be included.` : 'Select at least one report section to export.';
+      const hint = count ? `${count} selected section${count === 1 ? '' : 's'} will be included.` : 'Select at least one report section to export.';
+      document.getElementById('exportHint').textContent = hint;
+      document.getElementById('pdfExportHint').textContent = hint;
     }
     function option(id, title, description, value) {
       return `<label class="report-option"><input type="checkbox" value="${id}" checked><span class="report-option-check"><i data-feather="check"></i></span><span><strong>${title}</strong><small>${description}</small></span><b>${value}</b></label>`;
@@ -119,11 +121,49 @@
       if (selected.includes('registered-dogs')) sheets.push(['New Registrations', [['Dog ID', 'Dog Name', 'Breed', 'Gender', 'Date Added'], ...registered.map(dog => [dog.dogid, dog.dogname, dog.breed, dog.gender, dateText(dog.created_at)])]]);
       return sheets;
     }
+    function styleExcelSheet(sheet, isOverview = false) {
+      const range = XLSX.utils.decode_range(sheet['!ref']);
+      for (let row = range.s.r; row <= range.e.r; row++) {
+        for (let col = range.s.c; col <= range.e.c; col++) {
+          const address = XLSX.utils.encode_cell({ r: row, c: col });
+          if (!sheet[address]) continue;
+          sheet[address].s = { font: { name: 'Arial', sz: 11, color: { rgb: '1F2937' } }, alignment: { vertical: 'center', wrapText: true } };
+        }
+      }
+      if (isOverview) {
+        sheet.A1.s = { font: { name: 'Arial', sz: 18, bold: true, color: { rgb: '17347A' } }, alignment: { vertical: 'center' } };
+        sheet['!merges'] = [XLSX.utils.decode_range('A1:D1')];
+        sheet['!rows'] = [{ hpt: 28 }];
+        ['A3', 'A4', 'A6'].forEach(address => { if (sheet[address]) sheet[address].s = { font: { name: 'Arial', sz: 11, bold: true, color: { rgb: '17347A' } } }; });
+        sheet['!cols'] = [{ wch: 24 }, { wch: 32 }, { wch: 18 }, { wch: 18 }];
+      } else {
+        for (let col = range.s.c; col <= range.e.c; col++) {
+          const address = XLSX.utils.encode_cell({ r: 0, c: col });
+          if (sheet[address]) sheet[address].s = { font: { name: 'Arial', sz: 11, bold: true, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: 'B91C1C' } }, alignment: { vertical: 'center', wrapText: true } };
+        }
+        sheet['!rows'] = [{ hpt: 24 }];
+        sheet['!cols'] = Array.from({ length: range.e.c + 1 }, () => ({ wch: 20 }));
+      }
+    }
     function exportExcel() {
       const selected = selectedOptions();
       if ((!monthInput.value && !isAllTime()) || !selected.length) return;
       const workbook = XLSX.utils.book_new();
-      rowsForSelection(selected).forEach(([name, rows]) => XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(rows), name));
+      const sectionNames = {
+        'sales-summary': 'Sales summary', 'sold-dogs': 'Sold dog details', 'adoption-summary': 'Adoption summary',
+        'adopted-dogs': 'Adopted dog details', 'registered-dogs': 'New dog registrations'
+      };
+      const overview = XLSX.utils.aoa_to_sheet([
+        ['Alpha Delta Kennel Report'],
+        [],
+        ['Report period', periodLabel()],
+        ['Generated', new Date().toLocaleString()],
+        [],
+        ['Included sections'],
+        ...selected.map(section => [sectionNames[section]])
+      ]);
+      styleExcelSheet(overview, true); XLSX.utils.book_append_sheet(workbook, overview, 'Report Overview');
+      rowsForSelection(selected).forEach(([name, rows]) => { const sheet = XLSX.utils.aoa_to_sheet(rows); styleExcelSheet(sheet); XLSX.utils.book_append_sheet(workbook, sheet, name); });
       XLSX.writeFile(workbook, `alpha-delta-kennel-report-${isAllTime() ? 'all-time' : monthInput.value}.xlsx`);
     }
     function exportPdf() {
