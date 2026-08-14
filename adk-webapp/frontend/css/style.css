@@ -143,6 +143,14 @@ body {
 .btn-secondary { background: #eef2f7; color: var(--text); }
 .btn-secondary:hover { background: #e3e9f2; transform: translateY(-1px); }
 
+.btn-excel {
+  background: #15803d;
+  color: #fff;
+  width: auto;
+  box-shadow: 0 6px 16px rgba(21,128,61,0.25);
+}
+.btn-excel:hover { background: #166534; transform: translateY(-1px); box-shadow: 0 10px 22px rgba(21,128,61,0.32); }
+
 .btn-danger { background: #fdecec; color: var(--danger); }
 .btn-danger:hover { background: #fbdada; transform: translateY(-1px); }
 
@@ -331,6 +339,40 @@ body {
   gap: 16px;
   flex-wrap: wrap;
 }
+
+/* Reports */
+.report-main { max-width: 1040px; margin: 0 auto; width: 100%; }
+.report-panel, .available-data, .excel-export-panel {
+  background: rgba(255,255,255,0.76);
+  border: 1px solid rgba(255,255,255,0.84);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(23,52,122,0.08);
+}
+.report-panel { padding: 24px; display: grid; grid-template-columns: 1fr auto auto; gap: 18px 28px; align-items: end; }
+.report-panel h3, .available-data h3, .excel-export-panel h3 { margin: 0 0 5px; font-size: 16px; }
+.report-panel p, .available-data p, .excel-export-panel p { margin: 0; color: var(--muted); font-size: 13px; }
+.report-month-label { display: flex; flex-direction: column; gap: 7px; font-size: 12px; font-weight: 700; color: var(--muted); }
+.report-month-label input { border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px; font: inherit; color: var(--text); background: #fff; }
+.report-month-label input:disabled { background: #f1f5f9; color: var(--muted); cursor: not-allowed; }
+.all-time-toggle { display: flex; align-items: center; gap: 8px; padding-bottom: 11px; color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; }
+.all-time-toggle input { width: 17px; height: 17px; accent-color: var(--blue); }
+.report-date { grid-column: 1 / -1; padding-top: 4px; color: var(--blue-deep); font-size: 13px; font-weight: 600; }
+.available-data { margin-top: 20px; padding: 24px; }
+.available-data[hidden] { display: none; }
+.available-data-heading { display: flex; justify-content: space-between; align-items: start; gap: 16px; margin-bottom: 16px; }
+.text-button { border: 0; background: transparent; color: var(--blue); font-weight: 700; cursor: pointer; padding: 4px; }
+.report-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.report-option { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 11px; padding: 16px; border: 1px solid var(--border); border-radius: 12px; background: #fff; cursor: pointer; transition: border-color .16s ease, box-shadow .16s ease; }
+.report-option:hover { border-color: var(--blue); box-shadow: 0 4px 14px rgba(47,111,237,.10); }
+.report-option input { position: absolute; opacity: 0; }
+.report-option-check { width: 20px; height: 20px; display: grid; place-items: center; border: 2px solid #b8c3d3; border-radius: 6px; color: transparent; }
+.report-option input:checked + .report-option-check { background: var(--blue); border-color: var(--blue); color: #fff; }
+.report-option-check [data-feather] { width: 13px; height: 13px; }
+.report-option strong, .report-option small { display: block; }
+.report-option strong { font-size: 13px; margin-bottom: 3px; }.report-option small { color: var(--muted); font-size: 11px; line-height: 1.35; }
+.report-option b { color: var(--blue-deep); font-size: 12px; text-align: right; white-space: nowrap; }
+.excel-export-panel { margin-top: 20px; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; background: linear-gradient(135deg, #eaf8ef, #d8f1e1); border-color: #b9e2c7; }
+.excel-export-copy { display: flex; align-items: center; gap: 14px; }.excel-export-copy > [data-feather] { color: #15803d; width: 28px; height: 28px; }
 .search-box {
   display: flex;
   align-items: center;
@@ -508,4 +550,8 @@ td.actions button { padding: 6px 11px; font-size: 12px; gap: 5px; }
   .sidebar-logout { margin-top: 0; margin-left: auto; }
   .stat-grid { grid-template-columns: 1fr; }
   .main { padding: 24px 20px; }
+  .report-panel { grid-template-columns: 1fr; }
+  .report-date { grid-column: auto; }
+  .report-options { grid-template-columns: 1fr; }
+  .excel-export-panel { align-items: flex-start; flex-direction: column; }
 }

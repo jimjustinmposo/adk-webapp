@@ -7,8 +7,6 @@
 <link rel="stylesheet" href="css/style.css">
 <script src="https://unpkg.com/feather-icons"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -23,74 +21,110 @@
       </nav>
       <button class="sidebar-logout" onclick="logout()"><i data-feather="log-out"></i> Log out</button>
     </aside>
-    <main class="main fade-in-up">
+    <main class="main fade-in-up report-main">
       <h2 class="page-title"><i data-feather="file-text"></i> Kennel Reports</h2>
-      <div class="toolbar">
-        <div style="color:var(--muted); font-size:14px;" id="reportDate"></div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <button class="btn btn-secondary" id="excelBtn" style="width:auto;"><i data-feather="file"></i> Export Excel</button>
-          <button class="btn btn-primary" id="pdfBtn" style="width:auto;"><i data-feather="download"></i> Export PDF</button>
+      <section class="report-panel">
+        <div>
+          <h3>Choose the report month</h3>
+          <p>Select a month to see the data available for your report.</p>
         </div>
-      </div>
-      <div class="stat-grid">
-        <div class="stat-card pop"><i class="stat-icon" data-feather="hash"></i><div class="stat-label">Total Dogs</div><div class="stat-value" id="totalDogs">—</div></div>
-        <div class="stat-card pop"><i class="stat-icon" data-feather="heart"></i><div class="stat-label">Active Dogs</div><div class="stat-value" id="activeDogs">—</div></div>
-        <div class="stat-card pop"><i class="stat-icon" data-feather="x-circle"></i><div class="stat-label">Deceased Dogs</div><div class="stat-value" id="deceasedDogs">—</div></div>
-        <div class="stat-card pop"><i class="stat-icon" data-feather="tag"></i><div class="stat-label">Sold Dogs</div><div class="stat-value" id="soldDogs">—</div></div>
-        <div class="stat-card pop"><i class="stat-icon" data-feather="home"></i><div class="stat-label">Adopted Dogs</div><div class="stat-value" id="adoptedDogs">—</div></div>
-        <div class="stat-card pop"><i class="stat-icon" data-feather="dollar-sign"></i><div class="stat-label">Total Sales</div><div class="stat-value" id="totalSales">—</div></div>
-        <div class="stat-card pop"><i class="stat-icon" data-feather="alert-triangle"></i><div class="stat-label">Missing Information</div><div class="stat-value" id="missingDogs">—</div></div>
-        <div class="stat-card pop"><i class="stat-icon" data-feather="flag"></i><div class="stat-label">Dogs in USA</div><div class="stat-value" id="usaDogs">—</div></div>
-      </div>
-      <div class="table-wrap" style="margin-top:24px;"><table><thead><tr><th>Dashboard Breakdown</th><th>Details</th></tr></thead><tbody id="breakdownBody"></tbody></table></div>
+        <label class="report-month-label" for="reportMonth">Report month
+          <input type="month" id="reportMonth" aria-describedby="reportDate">
+        </label>
+        <label class="all-time-toggle"><input type="checkbox" id="allTimeReport"> <span>All time report</span></label>
+        <div id="reportDate" class="report-date" aria-live="polite">Select a month to prepare a report.</div>
+      </section>
+
+      <section id="availableData" class="available-data" hidden>
+        <div class="available-data-heading">
+          <div><h3 id="availableTitle">Available data</h3><p>Check the information you want to include in the Excel report.</p></div>
+          <button type="button" class="text-button" id="toggleAllBtn">Select all</button>
+        </div>
+        <div id="reportOptions" class="report-options"></div>
+      </section>
+
+      <section class="excel-export-panel">
+        <div class="excel-export-copy"><i data-feather="file-text"></i><div><h3>Export Excel report</h3><p id="exportHint">Choose a month and select the data to export.</p></div></div>
+        <button class="btn btn-excel" id="excelBtn" disabled><i data-feather="download"></i> Export Excel</button>
+      </section>
     </main>
   </div>
   <script src="js/api.js"></script>
   <script>
     requireLogin(); renderSidebarProfile();
-    let report = null, dogs = [];
+    let dogs = [];
+    const monthInput = document.getElementById('reportMonth');
+    const allTimeInput = document.getElementById('allTimeReport');
+    const reportDate = document.getElementById('reportDate');
+    const availableData = document.getElementById('availableData');
+    const reportOptions = document.getElementById('reportOptions');
+    const excelBtn = document.getElementById('excelBtn');
     const money = value => `${new Intl.NumberFormat('en-AE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(value || 0))} AED`;
     const dateText = value => value ? new Date(`${value.substring(0, 10)}T00:00:00`).toLocaleDateString() : '';
-    function addBreakdown(label, details) { const row = document.createElement('tr'); [label, details].forEach(value => { const cell = document.createElement('td'); cell.textContent = value; row.appendChild(cell); }); document.getElementById('breakdownBody').appendChild(row); }
-    async function loadReport() {
-      try {
-        const [stats, dogData] = await Promise.all([apiRequest('/dashboard/stats'), apiRequest('/dogs')]);
-        report = stats; dogs = dogData.dogs;
-        const sold = dogs.filter(dog => dog.status === 'sold'); const adopted = dogs.filter(dog => dog.status === 'adopted');
-        const sales = sold.reduce((total, dog) => total + Number(dog.sale_amount || 0), 0);
-        document.getElementById('reportDate').textContent = `Generated: ${new Date().toLocaleString()}`;
-        const values = { totalDogs: stats.totalDogs, activeDogs: stats.activeDogs, deceasedDogs: stats.deceasedDogs, soldDogs: sold.length, adoptedDogs: adopted.length, totalSales: money(sales), missingDogs: stats.dogsWithMissingInfo, usaDogs: stats.dogsInUSA };
-        Object.entries(values).forEach(([id, value]) => document.getElementById(id).textContent = value);
-        const body = document.getElementById('breakdownBody'); body.innerHTML = '';
-        addBreakdown('Dogs by Breed', stats.dogsByBreed.map(item => `${item.breed}: ${item.count}`).join(' • ') || 'None');
-        addBreakdown('Dogs by Gender', stats.dogsByGender.map(item => `${item.gender}: ${item.count}`).join(' • ') || 'None');
-      } catch (error) { alert(error.message); }
+    const displayMonth = value => new Date(`${value}-01T00:00:00`).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const inMonth = (dog, month) => String(dog.disposition_date || '').substring(0, 7) === month;
+    const createdInMonth = (dog, month) => String(dog.created_at || '').substring(0, 7) === month;
+    const isAllTime = () => allTimeInput.checked;
+    const periodLabel = () => isAllTime() ? 'All time' : displayMonth(monthInput.value);
+    const matchesDispositionPeriod = dog => isAllTime() || inMonth(dog, monthInput.value);
+    const matchesRegistrationPeriod = dog => isAllTime() || createdInMonth(dog, monthInput.value);
+
+    function selectedOptions() { return [...document.querySelectorAll('.report-option input:checked')].map(input => input.value); }
+    function updateExportState() {
+      const count = selectedOptions().length;
+      excelBtn.disabled = (!monthInput.value && !isAllTime()) || !count;
+      document.getElementById('exportHint').textContent = count ? `${count} selected section${count === 1 ? '' : 's'} will be included.` : 'Select at least one report section to export.';
     }
-    function summaryRows() {
-      const sold = dogs.filter(dog => dog.status === 'sold'), adopted = dogs.filter(dog => dog.status === 'adopted');
-      return [['Report Generated', new Date().toLocaleString()], ['Total Dogs', report.totalDogs], ['Active Dogs', report.activeDogs], ['Deceased Dogs', report.deceasedDogs], ['Sold Dogs', sold.length], ['Adopted Dogs', adopted.length], ['Total Sales', money(sold.reduce((total, dog) => total + Number(dog.sale_amount || 0), 0))], ['Missing Information', report.dogsWithMissingInfo], ['Dogs in USA', report.dogsInUSA], ['Dogs by Breed', report.dogsByBreed.map(item => `${item.breed}: ${item.count}`).join(', ')], ['Dogs by Gender', report.dogsByGender.map(item => `${item.gender}: ${item.count}`).join(', ')]];
+    function option(id, title, description, value) {
+      return `<label class="report-option"><input type="checkbox" value="${id}" checked><span class="report-option-check"><i data-feather="check"></i></span><span><strong>${title}</strong><small>${description}</small></span><b>${value}</b></label>`;
+    }
+    function renderAvailableData() {
+      if (!monthInput.value && !isAllTime()) { availableData.hidden = true; updateExportState(); return; }
+      const sold = dogs.filter(dog => dog.status === 'sold' && matchesDispositionPeriod(dog));
+      const adopted = dogs.filter(dog => dog.status === 'adopted' && matchesDispositionPeriod(dog));
+      const registered = dogs.filter(matchesRegistrationPeriod);
+      const sales = sold.reduce((total, dog) => total + Number(dog.sale_amount || 0), 0);
+      document.getElementById('availableTitle').textContent = `Available data for ${periodLabel()}`;
+      reportDate.textContent = `Report period: ${periodLabel()}`;
+      reportOptions.innerHTML = [
+        option('sales-summary', 'Sales summary', 'Total number of dogs sold and sales revenue.', `${sold.length} sold · ${money(sales)}`),
+        option('sold-dogs', 'Sold dog details', 'Each dog sold, buyer details, sale date, and amount.', `${sold.length} records`),
+        option('adoption-summary', 'Adoption summary', 'Total number of dogs adopted during the month.', `${adopted.length} adopted`),
+        option('adopted-dogs', 'Adopted dog details', 'Each adopted dog, adopter details, and adoption date.', `${adopted.length} records`),
+        option('registered-dogs', 'New dog registrations', 'Dogs added to the kennel during this month.', `${registered.length} records`)
+      ].join('');
+      availableData.hidden = false;
+      reportOptions.querySelectorAll('input').forEach(input => input.addEventListener('change', updateExportState));
+      feather.replace(); updateExportState();
+    }
+    function rowsForSelection(selected) {
+      const sold = dogs.filter(dog => dog.status === 'sold' && matchesDispositionPeriod(dog));
+      const adopted = dogs.filter(dog => dog.status === 'adopted' && matchesDispositionPeriod(dog));
+      const registered = dogs.filter(matchesRegistrationPeriod);
+      const sheets = [];
+      if (selected.includes('sales-summary')) sheets.push(['Sales Summary', [['Report period', periodLabel()], ['Dogs sold', sold.length], ['Total sales', money(sold.reduce((total, dog) => total + Number(dog.sale_amount || 0), 0))]]]);
+      if (selected.includes('sold-dogs')) sheets.push(['Sold Dogs', [['Dog ID', 'Dog Name', 'Breed', 'Date Sold', 'Buyer', "Buyer's Address", 'Contact', 'Sale Amount (AED)'], ...sold.map(dog => [dog.dogid, dog.dogname, dog.breed, dateText(dog.disposition_date), dog.disposition_contact_name, dog.disposition_contact_address, dog.disposition_contact_details, Number(dog.sale_amount || 0)])]]);
+      if (selected.includes('adoption-summary')) sheets.push(['Adoption Summary', [['Report period', periodLabel()], ['Dogs adopted', adopted.length]]]);
+      if (selected.includes('adopted-dogs')) sheets.push(['Adopted Dogs', [['Dog ID', 'Dog Name', 'Breed', 'Date Adopted', 'Adopter', "Adopter's Address", 'Contact'], ...adopted.map(dog => [dog.dogid, dog.dogname, dog.breed, dateText(dog.disposition_date), dog.disposition_contact_name, dog.disposition_contact_address, dog.disposition_contact_details])]]);
+      if (selected.includes('registered-dogs')) sheets.push(['New Registrations', [['Dog ID', 'Dog Name', 'Breed', 'Gender', 'Date Added'], ...registered.map(dog => [dog.dogid, dog.dogname, dog.breed, dog.gender, dateText(dog.created_at)])]]);
+      return sheets;
     }
     function exportExcel() {
-      if (!report) return;
+      const selected = selectedOptions();
+      if ((!monthInput.value && !isAllTime()) || !selected.length) return;
       const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([['Alpha Delta Kennel Report'], [], ...summaryRows()]), 'Summary');
-      const soldRows = [['DogID', 'Dog Name', 'Breed', 'Date Sold', 'Buyer', "Buyer's Address", 'Contact', 'Unit Price (AED)'], ...dogs.filter(dog => dog.status === 'sold').map(dog => [dog.dogid, dog.dogname, dog.breed, dateText(dog.disposition_date), dog.disposition_contact_name, dog.disposition_contact_address, dog.disposition_contact_details, Number(dog.sale_amount || 0)])];
-      const adoptedRows = [['DogID', 'Dog Name', 'Breed', 'Date Adopted', 'Adopter', "Adopter's Address", 'Contact'], ...dogs.filter(dog => dog.status === 'adopted').map(dog => [dog.dogid, dog.dogname, dog.breed, dateText(dog.disposition_date), dog.disposition_contact_name, dog.disposition_contact_address, dog.disposition_contact_details])];
-      XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(soldRows), 'Sold Dogs'); XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(adoptedRows), 'Adopted Dogs');
-      XLSX.writeFile(workbook, 'alpha-delta-kennel-report.xlsx');
+      rowsForSelection(selected).forEach(([name, rows]) => XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet(rows), name));
+      XLSX.writeFile(workbook, `alpha-delta-kennel-report-${isAllTime() ? 'all-time' : monthInput.value}.xlsx`);
     }
-    function exportPdf() {
-      if (!report) return;
-      const { jsPDF } = window.jspdf; const pdf = new jsPDF();
-      pdf.setFontSize(18); pdf.text('Alpha Delta Kennel Report', 14, 18); pdf.setFontSize(10); pdf.text(`Generated: ${new Date().toLocaleString()}`, 14, 25);
-      pdf.autoTable({ startY: 31, head: [['Metric', 'Value']], body: summaryRows().slice(1), theme: 'grid', headStyles: { fillColor: [37, 88, 166] } });
-      const sold = dogs.filter(dog => dog.status === 'sold'); const adopted = dogs.filter(dog => dog.status === 'adopted');
-      pdf.addPage(); pdf.setFontSize(15); pdf.text('Sold Dogs', 14, 16); pdf.autoTable({ startY: 21, head: [['Dog', 'Breed', 'Date Sold', 'Buyer', "Buyer's Address", 'Price']], body: sold.map(dog => [dog.dogname || '', dog.breed || '', dateText(dog.disposition_date), dog.disposition_contact_name || '', dog.disposition_contact_address || '', money(dog.sale_amount)]), theme: 'grid', headStyles: { fillColor: [37, 88, 166] } });
-      pdf.addPage(); pdf.setFontSize(15); pdf.text('Adopted Dogs', 14, 16); pdf.autoTable({ startY: 21, head: [['Dog', 'Breed', 'Date Adopted', 'Adopter', "Adopter's Address", 'Contact']], body: adopted.map(dog => [dog.dogname || '', dog.breed || '', dateText(dog.disposition_date), dog.disposition_contact_name || '', dog.disposition_contact_address || '', dog.disposition_contact_details || '']), theme: 'grid', headStyles: { fillColor: [37, 88, 166] } });
-      pdf.save('alpha-delta-kennel-report.pdf');
-    }
-    document.getElementById('excelBtn').addEventListener('click', exportExcel); document.getElementById('pdfBtn').addEventListener('click', exportPdf);
-    loadReport(); feather.replace();
+    document.getElementById('toggleAllBtn').addEventListener('click', event => {
+      const inputs = [...reportOptions.querySelectorAll('input')], allSelected = inputs.every(input => input.checked);
+      inputs.forEach(input => input.checked = !allSelected); event.currentTarget.textContent = allSelected ? 'Select all' : 'Clear all'; updateExportState();
+    });
+    monthInput.addEventListener('change', renderAvailableData);
+    allTimeInput.addEventListener('change', () => { monthInput.disabled = allTimeInput.checked; renderAvailableData(); });
+    excelBtn.addEventListener('click', exportExcel);
+    apiRequest('/dogs').then(data => { dogs = data.dogs; if (monthInput.value) renderAvailableData(); }).catch(error => { reportDate.textContent = error.message; });
+    feather.replace();
   </script>
 </body>
 </html>
