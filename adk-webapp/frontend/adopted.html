@@ -27,27 +27,28 @@
         <button class="btn btn-primary" id="addAdoptedBtn" style="width:auto;"><i data-feather="heart"></i> Mark Dog as Adopted</button>
       </div>
       <div class="table-wrap"><table>
-        <thead><tr><th>Photo</th><th>DogID</th><th>Dog Name</th><th>Breed</th><th>Date Adopted</th><th>Adopter</th><th>Adopter's Address</th><th>Contact Details</th></tr></thead>
+        <thead><tr><th>Photo</th><th>DogID</th><th>Dog Name</th><th>Breed</th><th>Date Adopted</th><th>Adopter</th><th>Adopter's Address</th><th>Contact Details</th><th>Actions</th></tr></thead>
         <tbody id="adoptedTableBody"></tbody>
       </table></div>
       <div class="empty-state" id="emptyState" style="display:none;">No adopted dogs found.</div>
     </main>
   </div>
   <div class="modal-overlay" id="modalOverlay"><div class="modal"><form id="adoptedForm">
-    <div class="field"><label>Search Dog Database</label><input id="dogSearch" type="search" list="dogOptions" placeholder="Type a dog's name, nickname, breed, or DogID" required><datalist id="dogOptions"></datalist></div>
+    <h3 id="modalTitle" style="margin:0 0 16px;">Mark Dog as Adopted</h3>
+    <div class="field" id="dogSearchField"><label>Search Dog Database</label><input id="dogSearch" type="search" list="dogOptions" placeholder="Type a dog's name, nickname, breed, or DogID" required><datalist id="dogOptions"></datalist></div>
     <div id="selectedDogInfo" style="display:none;background:rgba(255,255,255,.15);color:#fff;border-radius:8px;padding:10px 14px;margin-bottom:16px;"></div>
     <div class="field"><label>Date Adopted</label><input id="adoptionDate" type="date" required></div>
     <div class="field"><label>Adopter's Name</label><input id="adopterName" type="text" required></div>
     <div class="field"><label>Adopter's Address</label><textarea id="adopterAddress" rows="2" required></textarea></div>
     <div class="field"><label>Adopter's Contact Details</label><input id="adopterContact" type="text" required></div>
     <div class="field"><label>Comments</label><textarea id="comment" rows="3"></textarea></div>
-    <div class="modal-actions"><button class="btn btn-secondary" type="button" id="cancelBtn">Cancel</button><button class="btn btn-primary" type="submit"><i data-feather="save"></i> Save Adoption</button></div>
+    <div class="modal-actions"><button class="btn btn-secondary" type="button" id="cancelBtn">Cancel</button><button class="btn btn-primary" type="submit"><i data-feather="save"></i> <span id="saveBtnText">Save Adoption</span></button></div>
   </form></div></div>
   <script src="js/api.js"></script>
   <script>
     requireLogin(); renderSidebarProfile();
     const tableBody = document.getElementById('adoptedTableBody'); const modal = document.getElementById('modalOverlay');
-    let adoptedDogs = [], availableDogs = [];
+    let adoptedDogs = [], availableDogs = [], editingDog = null;
     function dateText(value) { return value ? new Date(`${value.substring(0, 10)}T00:00:00`).toLocaleDateString() : ''; }
     function render(dogs) {
       tableBody.innerHTML = ''; document.getElementById('emptyState').style.display = dogs.length ? 'none' : 'block';
@@ -55,8 +56,29 @@
         if (dog.photo) { const image = document.createElement('img'); image.src = dog.photo; image.alt = ''; image.style.cssText = 'width:34px;height:34px;border-radius:50%;object-fit:cover;'; photoCell.appendChild(image); }
         else { photoCell.innerHTML = '<div title="No dog photo" style="width:34px;height:34px;border-radius:50%;background:var(--blue-soft);display:flex;align-items:center;justify-content:center;"><i data-feather="camera-off" style="width:14px;height:14px;color:var(--blue);"></i></div>'; }
         row.appendChild(photoCell);
-        [dog.dogid, dog.dogname, dog.breed, dateText(dog.disposition_date), dog.disposition_contact_name, dog.disposition_contact_address, dog.disposition_contact_details].forEach(value => { const cell = document.createElement('td'); cell.textContent = value || ''; row.appendChild(cell); }); tableBody.appendChild(row);
+        [dog.dogid, dog.dogname, dog.breed, dateText(dog.disposition_date), dog.disposition_contact_name, dog.disposition_contact_address, dog.disposition_contact_details].forEach(value => { const cell = document.createElement('td'); cell.textContent = value || ''; row.appendChild(cell); });
+        const actionsCell = document.createElement('td');
+        actionsCell.innerHTML = `<button type="button" class="btn btn-secondary edit-btn" data-id="${dog.dogid}" style="width:auto;padding:6px 12px;"><i data-feather="edit-2" style="width:14px;height:14px;"></i> Edit</button>`;
+        row.appendChild(actionsCell);
+        tableBody.appendChild(row);
       }); feather.replace();
+    }
+    tableBody.addEventListener('click', event => { const btn = event.target.closest('.edit-btn'); if (!btn) return; const dog = adoptedDogs.find(item => String(item.dogid) === btn.dataset.id); if (dog) openEditModal(dog); });
+    function openEditModal(dog) {
+      editingDog = dog; document.getElementById('adoptedForm').reset();
+      document.getElementById('dogSearchField').style.display = 'none';
+      document.getElementById('dogSearch').required = false;
+      const info = document.getElementById('selectedDogInfo');
+      info.textContent = `Editing: ${dogLabel(dog)}${dog.microchip ? ` | Microchip: ${dog.microchip}` : ''}`;
+      info.style.display = 'block';
+      document.getElementById('adoptionDate').value = (dog.disposition_date || '').substring(0, 10);
+      document.getElementById('adopterName').value = dog.disposition_contact_name || '';
+      document.getElementById('adopterAddress').value = dog.disposition_contact_address || '';
+      document.getElementById('adopterContact').value = dog.disposition_contact_details || '';
+      document.getElementById('comment').value = dog.comment || '';
+      document.getElementById('modalTitle').textContent = 'Edit Adoption Record';
+      document.getElementById('saveBtnText').textContent = 'Update Adoption';
+      modal.classList.add('show'); feather.replace();
     }
     async function loadAdoptedDogs() { try { const data = await apiRequest('/dogs'); adoptedDogs = data.dogs.filter(dog => dog.status === 'adopted'); availableDogs = data.dogs.filter(dog => dog.status === 'active'); filterDogs(); } catch (error) { alert(error.message); } }
     function filterDogs() { const term = document.getElementById('searchInput').value.toLowerCase(); render(adoptedDogs.filter(dog => [dog.dogname, dog.breed, dog.disposition_contact_name, dog.microchip].some(value => (value || '').toLowerCase().includes(term)))); }
@@ -67,13 +89,19 @@
       const list = t ? availableDogs.filter(dog => [dog.dogname, dog.nickname, dog.breed, dog.microchip, String(dog.dogid)].some(value => (value || '').toString().toLowerCase().includes(t))) : availableDogs;
       document.getElementById('dogOptions').innerHTML = list.map(dog => `<option value="${dog.dogid}" label="${dogLabel(dog)}"></option>`).join('');
     }
-    document.getElementById('addAdoptedBtn').addEventListener('click', () => { document.getElementById('adoptedForm').reset(); buildDogOptions(''); document.getElementById('selectedDogInfo').style.display = 'none'; modal.classList.add('show'); feather.replace(); });
-    document.getElementById('cancelBtn').addEventListener('click', () => modal.classList.remove('show'));
+    document.getElementById('addAdoptedBtn').addEventListener('click', () => { editingDog = null; document.getElementById('adoptedForm').reset(); document.getElementById('dogSearchField').style.display = ''; document.getElementById('dogSearch').required = true; document.getElementById('modalTitle').textContent = 'Mark Dog as Adopted'; document.getElementById('saveBtnText').textContent = 'Save Adoption'; buildDogOptions(''); document.getElementById('selectedDogInfo').style.display = 'none'; modal.classList.add('show'); feather.replace(); });
+    document.getElementById('cancelBtn').addEventListener('click', () => { editingDog = null; modal.classList.remove('show'); });
     document.getElementById('dogSearch').addEventListener('input', event => { const term = event.target.value; const dog = availableDogs.find(item => String(item.dogid) === term); const info = document.getElementById('selectedDogInfo'); if (!dog) { info.style.display = 'none'; buildDogOptions(term); return; } info.textContent = `Selected: ${dogLabel(dog)}${dog.microchip ? ` | Microchip: ${dog.microchip}` : ''}`; info.style.display = 'block'; });
-    document.getElementById('adoptedForm').addEventListener('submit', async event => { event.preventDefault(); const value = id => document.getElementById(id).value; const selectedDog = availableDogs.find(dog => String(dog.dogid) === value('dogSearch')); if (!selectedDog) return alert('Please select a dog from the Dog Database.'); const body = {
-      breed: selectedDog.breed, dogname: selectedDog.dogname, nickname: selectedDog.nickname, gender: selectedDog.gender, dob: selectedDog.dob, microchip: selectedDog.microchip, father: selectedDog.father, mother: selectedDog.mother, comment: value('comment') || selectedDog.comment, status: 'adopted', photo: selectedDog.photo,
-      disposition_date: value('adoptionDate'), disposition_contact_name: value('adopterName'), disposition_contact_address: value('adopterAddress'), disposition_contact_details: value('adopterContact')
-    }; try { await apiRequest(`/dogs/${selectedDog.dogid}`, { method: 'PUT', body }); modal.classList.remove('show'); loadAdoptedDogs(); } catch (error) { alert(error.message); } });
+    document.getElementById('adoptedForm').addEventListener('submit', async event => {
+      event.preventDefault(); const value = id => document.getElementById(id).value;
+      const dogRecord = editingDog || availableDogs.find(dog => String(dog.dogid) === value('dogSearch'));
+      if (!dogRecord) return alert('Please select a dog from the Dog Database.');
+      const body = {
+        breed: dogRecord.breed, dogname: dogRecord.dogname, nickname: dogRecord.nickname, gender: dogRecord.gender, dob: dogRecord.dob, microchip: dogRecord.microchip, father: dogRecord.father, mother: dogRecord.mother, comment: value('comment') || dogRecord.comment, status: 'adopted', photo: dogRecord.photo,
+        disposition_date: value('adoptionDate'), disposition_contact_name: value('adopterName'), disposition_contact_address: value('adopterAddress'), disposition_contact_details: value('adopterContact')
+      };
+      try { await apiRequest(`/dogs/${dogRecord.dogid}`, { method: 'PUT', body }); editingDog = null; modal.classList.remove('show'); loadAdoptedDogs(); } catch (error) { alert(error.message); }
+    });
     loadAdoptedDogs(); feather.replace();
   </script>
 </body>
