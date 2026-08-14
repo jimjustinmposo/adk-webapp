@@ -34,7 +34,7 @@
     </main>
   </div>
   <div class="modal-overlay" id="modalOverlay"><div class="modal"><form id="adoptedForm">
-    <div class="field"><label>Search Dog Database</label><input id="dogSearch" type="search" list="dogOptions" placeholder="Type a dog's name, breed, or DogID" required><datalist id="dogOptions"></datalist></div>
+    <div class="field"><label>Search Dog Database</label><input id="dogSearch" type="search" list="dogOptions" placeholder="Type a dog's name, nickname, breed, or DogID" required><datalist id="dogOptions"></datalist></div>
     <div id="selectedDogInfo" style="display:none;background:rgba(255,255,255,.15);color:#fff;border-radius:8px;padding:10px 14px;margin-bottom:16px;"></div>
     <div class="field"><label>Date Adopted</label><input id="adoptionDate" type="date" required></div>
     <div class="field"><label>Adopter's Name</label><input id="adopterName" type="text" required></div>
@@ -61,9 +61,15 @@
     async function loadAdoptedDogs() { try { const data = await apiRequest('/dogs'); adoptedDogs = data.dogs.filter(dog => dog.status === 'adopted'); availableDogs = data.dogs.filter(dog => dog.status === 'active'); filterDogs(); } catch (error) { alert(error.message); } }
     function filterDogs() { const term = document.getElementById('searchInput').value.toLowerCase(); render(adoptedDogs.filter(dog => [dog.dogname, dog.breed, dog.disposition_contact_name, dog.microchip].some(value => (value || '').toLowerCase().includes(term)))); }
     document.getElementById('searchInput').addEventListener('input', filterDogs);
-    document.getElementById('addAdoptedBtn').addEventListener('click', () => { document.getElementById('adoptedForm').reset(); document.getElementById('dogOptions').innerHTML = availableDogs.map(dog => `<option value="${dog.dogid}" label="${dog.dogname || 'Unnamed'}${dog.breed ? ` — ${dog.breed}` : ''}"></option>`).join(''); document.getElementById('selectedDogInfo').style.display = 'none'; modal.classList.add('show'); feather.replace(); });
+    function dogLabel(dog) { return `${dog.dogname || 'Unnamed'}${dog.nickname ? ` "${dog.nickname}"` : ''}${dog.breed ? ` — ${dog.breed}` : ''}`; }
+    function buildDogOptions(term) {
+      const t = (term || '').toLowerCase().trim();
+      const list = t ? availableDogs.filter(dog => [dog.dogname, dog.nickname, dog.breed, dog.microchip, String(dog.dogid)].some(value => (value || '').toString().toLowerCase().includes(t))) : availableDogs;
+      document.getElementById('dogOptions').innerHTML = list.map(dog => `<option value="${dog.dogid}" label="${dogLabel(dog)}"></option>`).join('');
+    }
+    document.getElementById('addAdoptedBtn').addEventListener('click', () => { document.getElementById('adoptedForm').reset(); buildDogOptions(''); document.getElementById('selectedDogInfo').style.display = 'none'; modal.classList.add('show'); feather.replace(); });
     document.getElementById('cancelBtn').addEventListener('click', () => modal.classList.remove('show'));
-    document.getElementById('dogSearch').addEventListener('input', event => { const dog = availableDogs.find(item => String(item.dogid) === event.target.value); const info = document.getElementById('selectedDogInfo'); if (!dog) { info.style.display = 'none'; return; } info.textContent = `Selected: ${dog.dogname || 'Unnamed'}${dog.breed ? ` — ${dog.breed}` : ''}${dog.microchip ? ` | Microchip: ${dog.microchip}` : ''}`; info.style.display = 'block'; });
+    document.getElementById('dogSearch').addEventListener('input', event => { const term = event.target.value; const dog = availableDogs.find(item => String(item.dogid) === term); const info = document.getElementById('selectedDogInfo'); if (!dog) { info.style.display = 'none'; buildDogOptions(term); return; } info.textContent = `Selected: ${dogLabel(dog)}${dog.microchip ? ` | Microchip: ${dog.microchip}` : ''}`; info.style.display = 'block'; });
     document.getElementById('adoptedForm').addEventListener('submit', async event => { event.preventDefault(); const value = id => document.getElementById(id).value; const selectedDog = availableDogs.find(dog => String(dog.dogid) === value('dogSearch')); if (!selectedDog) return alert('Please select a dog from the Dog Database.'); const body = {
       breed: selectedDog.breed, dogname: selectedDog.dogname, nickname: selectedDog.nickname, gender: selectedDog.gender, dob: selectedDog.dob, microchip: selectedDog.microchip, father: selectedDog.father, mother: selectedDog.mother, comment: value('comment') || selectedDog.comment, status: 'adopted', photo: selectedDog.photo,
       disposition_date: value('adoptionDate'), disposition_contact_name: value('adopterName'), disposition_contact_address: value('adopterAddress'), disposition_contact_details: value('adopterContact')

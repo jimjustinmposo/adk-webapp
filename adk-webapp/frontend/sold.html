@@ -43,7 +43,7 @@
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
       <form id="soldForm">
-        <div class="field"><label>Search Dog Database</label><input id="dogSearch" type="search" list="dogOptions" placeholder="Type a dog's name, breed, or DogID" required><datalist id="dogOptions"></datalist></div>
+        <div class="field"><label>Search Dog Database</label><input id="dogSearch" type="search" list="dogOptions" placeholder="Type a dog's name, nickname, breed, or DogID" required><datalist id="dogOptions"></datalist></div>
         <div id="selectedDogInfo" style="display:none; background:rgba(255,255,255,.15); color:#fff; border-radius:8px; padding:10px 14px; margin-bottom:16px;"></div>
         <div class="field"><label>Date Sold</label><input id="dispositionDate" type="date" required></div>
         <div class="field"><label>Unit Price (AED)</label><input id="saleAmount" type="text" inputmode="decimal" placeholder="0.00 AED" required></div>
@@ -100,18 +100,25 @@
       render(soldDogs.filter(dog => [dog.dogname, dog.breed, dog.disposition_contact_name, dog.microchip].some(value => (value || '').toLowerCase().includes(term))));
     }
     document.getElementById('searchInput').addEventListener('input', filterDogs);
+    function dogLabel(dog) { return `${dog.dogname || 'Unnamed'}${dog.nickname ? ` "${dog.nickname}"` : ''}${dog.breed ? ` — ${dog.breed}` : ''}`; }
+    function buildDogOptions(term) {
+      const t = (term || '').toLowerCase().trim();
+      const list = t ? availableDogs.filter(dog => [dog.dogname, dog.nickname, dog.breed, dog.microchip, String(dog.dogid)].some(value => (value || '').toString().toLowerCase().includes(t))) : availableDogs;
+      document.getElementById('dogOptions').innerHTML = list.map(dog => `<option value="${dog.dogid}" label="${dogLabel(dog)}"></option>`).join('');
+    }
     document.getElementById('addSoldBtn').addEventListener('click', () => {
       document.getElementById('soldForm').reset();
-      document.getElementById('dogOptions').innerHTML = availableDogs.map(dog => `<option value="${dog.dogid}" label="${dog.dogname || 'Unnamed'}${dog.breed ? ` — ${dog.breed}` : ''}"></option>`).join('');
+      buildDogOptions('');
       document.getElementById('selectedDogInfo').style.display = 'none';
       modal.classList.add('show'); feather.replace();
     });
     document.getElementById('cancelBtn').addEventListener('click', () => modal.classList.remove('show'));
     document.getElementById('dogSearch').addEventListener('input', event => {
-      const dog = availableDogs.find(item => String(item.dogid) === event.target.value);
+      const term = event.target.value;
+      const dog = availableDogs.find(item => String(item.dogid) === term);
       const info = document.getElementById('selectedDogInfo');
-      if (!dog) { info.style.display = 'none'; return; }
-      info.textContent = `Selected: ${dog.dogname || 'Unnamed'}${dog.breed ? ` — ${dog.breed}` : ''}${dog.microchip ? ` | Microchip: ${dog.microchip}` : ''}`;
+      if (!dog) { info.style.display = 'none'; buildDogOptions(term); return; }
+      info.textContent = `Selected: ${dogLabel(dog)}${dog.microchip ? ` | Microchip: ${dog.microchip}` : ''}`;
       info.style.display = 'block';
     });
     document.getElementById('saleAmount').addEventListener('blur', event => { if (event.target.value.trim()) event.target.value = formatAed(event.target.value); });
