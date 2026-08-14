@@ -489,6 +489,7 @@
       updateDispositionFields();
       modalOverlay.classList.add('show');
       feather.replace();
+      setTimeout(() => document.getElementById('breed').focus(), 50);
     }
     function closeModal() { modalOverlay.classList.remove('show'); }
 
