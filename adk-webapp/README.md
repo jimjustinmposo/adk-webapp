@@ -48,18 +48,17 @@ Before going further:
 
 ## 2. Frontend — deploy to Vercel or Netlify
 
-1. Open `frontend/js/api.js` and set `API_BASE_URL` to your Railway backend
-   URL + `/api`, e.g. `https://your-app.up.railway.app/api`.
-2. Push the `frontend/` folder to GitHub (or the same repo, different root).
-3. In Vercel: **New Project**, select the repo, set root directory to
-   `frontend`, framework preset **Other** (it's static HTML, no build step).
-4. Deploy. You'll get a URL like `https://your-app.vercel.app`.
-5. Go back to Railway and set `CORS_ORIGIN` to that exact URL, then redeploy
-   the backend so it accepts requests from it.
+1. In Vercel or Netlify: **New Project**, select the repo.
+2. Set **Root Directory** to `frontend`.
+3. Set **Framework Preset** to **Vite** (Build command: `npm run build`, Output directory: `dist`).
+4. (Optional) Set environment variable `VITE_API_BASE_URL` to your backend API URL, e.g. `https://adk-webapp-production.up.railway.app/api`.
+5. Deploy. You'll get your public frontend URL (e.g. `https://your-app.vercel.app`).
+6. Set `CORS_ORIGIN` in your Railway backend variables to include your frontend URL.
 
 ## Local testing
 
-```
+### Backend:
+```bash
 cd backend
 cp .env.example .env   # fill in local values
 npm install
@@ -67,8 +66,12 @@ npm run migrate
 npm start               # API on http://localhost:3000
 ```
 
-Then just open `frontend/index.html` in a browser (or serve it with any
-static file server) — `api.js` already points at `localhost:3000`.
+### Frontend:
+```bash
+cd frontend
+npm install
+npm run dev             # Frontend on http://localhost:5173
+```
 
 ## What's implemented
 
