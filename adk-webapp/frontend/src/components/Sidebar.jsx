@@ -6,6 +6,7 @@ import {
   Tag,
   Heart,
   FileText,
+  MessageSquareHeart,
   LogOut,
   User,
   Menu,
@@ -103,6 +104,15 @@ export default function Sidebar() {
         >
           <FileText />
           <span>Reports & Exports</span>
+        </NavLink>
+
+        <NavLink
+          to="/contact"
+          className={({ isActive }) => (isActive ? 'active' : '')}
+          onClick={closeNav}
+        >
+          <MessageSquareHeart />
+          <span>Contact Developer</span>
         </NavLink>
       </nav>
 

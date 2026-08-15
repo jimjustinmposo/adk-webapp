@@ -11,6 +11,7 @@ import Dogs from './pages/Dogs';
 import Sold from './pages/Sold';
 import Adopted from './pages/Adopted';
 import Reports from './pages/Reports';
+import ContactDev from './pages/ContactDev';
 
 export default function App() {
   return (
@@ -35,6 +36,7 @@ export default function App() {
         <Route path="sold" element={<Sold />} />
         <Route path="adopted" element={<Adopted />} />
         <Route path="reports" element={<Reports />} />
+        <Route path="contact" element={<ContactDev />} />
       </Route>
 
       {/* Fallback */}
