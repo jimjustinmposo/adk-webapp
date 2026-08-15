@@ -1,13 +1,18 @@
-import React from 'react';
-import { MessageSquareHeart, Lightbulb, Bug, Sparkles, Phone } from 'lucide-react';
+import React, { useState } from 'react';
+import { Code2, Lightbulb, Bug, Sparkles, Phone, Send } from 'lucide-react';
 
 // UAE country code assumed from the app's existing AED currency/locale usage.
 // Update WHATSAPP_NUMBER if the developer's number should use a different
 // country code.
 const DISPLAY_NUMBER = '0501905138';
 const WHATSAPP_NUMBER = '971' + DISPLAY_NUMBER.replace(/^0/, '');
-const PREFILLED_MESSAGE = 'Hi Jim, I have feedback about the Alpha Delta Kennel webapp:';
-const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(PREFILLED_MESSAGE)}`;
+
+const MESSAGE_TYPES = [
+  { value: 'Suggestion', label: 'Suggestion' },
+  { value: 'Improvement', label: 'Improvement' },
+  { value: 'Bug Report', label: 'Bug Report' },
+  { value: 'General', label: 'General Feedback' }
+];
 
 function WhatsAppIcon(props) {
   return (
@@ -18,12 +23,33 @@ function WhatsAppIcon(props) {
 }
 
 export default function ContactDev() {
+  const [name, setName] = useState('');
+  const [type, setType] = useState('Suggestion');
+  const [message, setMessage] = useState('');
+
+  const canSend = message.trim().length > 0;
+
+  const handleSend = (e) => {
+    e.preventDefault();
+    if (!canSend) return;
+
+    const lines = [
+      `Hi Jim, I have a ${type.toLowerCase()} about the Alpha Delta Kennel webapp.`,
+      '',
+      message.trim()
+    ];
+    if (name.trim()) lines.push('', `— ${name.trim()}`);
+
+    const text = encodeURIComponent(lines.join('\n'));
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${text}`, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <main className="main fade-in-up">
       <div className="page-header">
         <h2 className="page-title">
           <div className="page-title-icon">
-            <MessageSquareHeart />
+            <Code2 />
           </div>
           <div>
             <div>Contact WebApp Developer</div>
@@ -39,17 +65,14 @@ export default function ContactDev() {
           <div className="contact-dev-card-glow" />
 
           <div className="contact-dev-header">
-            <div className="contact-dev-avatar">JP</div>
+            <div className="contact-dev-avatar">
+              <Code2 style={{ width: 26, height: 26 }} />
+            </div>
             <div>
               <div className="contact-dev-name">Jim Justin M. Poso</div>
               <div className="contact-dev-role">WebApp Developer</div>
             </div>
           </div>
-
-          <p className="contact-dev-blurb">
-            Found a bug, have an idea to make Alpha Delta Kennel better, or want to request
-            a new feature? Message me directly on WhatsApp — I read every message.
-          </p>
 
           <div className="contact-dev-tags">
             <span className="contact-dev-tag">
@@ -63,15 +86,45 @@ export default function ContactDev() {
             </span>
           </div>
 
-          <a
-            className="whatsapp-btn"
-            href={WHATSAPP_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <WhatsAppIcon style={{ width: 22, height: 22 }} />
-            <span>Message on WhatsApp</span>
-          </a>
+          <form className="contact-dev-form" onSubmit={handleSend}>
+            <div className="field">
+              <label htmlFor="contactName">Your Name (optional)</label>
+              <input
+                id="contactName"
+                type="text"
+                placeholder="e.g. Sarah"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+
+            <div className="field">
+              <label htmlFor="contactType">Message Type</label>
+              <select id="contactType" value={type} onChange={(e) => setType(e.target.value)}>
+                {MESSAGE_TYPES.map((t) => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="field">
+              <label htmlFor="contactMessage">Your Message</label>
+              <textarea
+                id="contactMessage"
+                rows={4}
+                required
+                placeholder="Describe your suggestion, improvement idea, or the bug you ran into..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+              />
+            </div>
+
+            <button type="submit" className="whatsapp-btn" disabled={!canSend}>
+              <WhatsAppIcon style={{ width: 20, height: 20 }} />
+              <span>Send via WhatsApp</span>
+              <Send style={{ width: 15, height: 15, opacity: 0.85 }} />
+            </button>
+          </form>
 
           <div className="contact-dev-number">
             <Phone style={{ width: 14, height: 14 }} />
