@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Download, Check } from 'lucide-react';
+import { FileText, Download, Check, Calendar } from 'lucide-react';
 import * as XLSX from 'xlsx-js-style';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
@@ -40,7 +40,7 @@ export default function Reports() {
     })();
   }, []);
 
-  const periodLabel = allTime ? 'All time' : reportMonth ? displayMonth(reportMonth) : '';
+  const periodLabel = allTime ? 'All Time (Full Archive)' : reportMonth ? displayMonth(reportMonth) : '';
   const matchesDispositionPeriod = (dog) => allTime || inMonth(dog, reportMonth);
   const matchesRegistrationPeriod = (dog) => allTime || createdInMonth(dog, reportMonth);
 
@@ -69,8 +69,8 @@ export default function Reports() {
   const isExportDisabled = !hasPeriod || selectedSections.length === 0;
 
   const exportHint = selectedSections.length
-    ? `${selectedSections.length} selected section${selectedSections.length === 1 ? '' : 's'} will be included.`
-    : 'Select at least one report section to export.';
+    ? `${selectedSections.length} selected section${selectedSections.length === 1 ? '' : 's'} included in export file.`
+    : 'Select at least one report section above to generate export.';
 
   // Excel Styling & Export
   const styleExcelSheet = (sheet, isOverview = false) => {
@@ -107,7 +107,7 @@ export default function Reports() {
         if (sheet[address]) {
           sheet[address].s = {
             font: { name: 'Arial', sz: 11, bold: true, color: { rgb: 'FFFFFF' } },
-            fill: { fgColor: { rgb: 'B91C1C' } },
+            fill: { fgColor: { rgb: '1E40AF' } },
             alignment: { vertical: 'center', wrapText: true }
           };
         }
@@ -238,7 +238,7 @@ export default function Reports() {
         head: [head],
         body,
         theme: 'grid',
-        headStyles: { fillColor: [185, 28, 28] },
+        headStyles: { fillColor: [30, 64, 175] },
         styles: { fontSize: 8 }
       });
     };
@@ -309,19 +309,28 @@ export default function Reports() {
 
   return (
     <main className="main fade-in-up report-main">
-      <h2 className="page-title">
-        <FileText />
-        <span>Kennel Reports</span>
-      </h2>
+      <div className="page-header">
+        <h2 className="page-title">
+          <div className="page-title-icon">
+            <FileText />
+          </div>
+          <div>
+            <div>Kennel Financial & Activity Reports</div>
+            <div style={{ fontSize: '13.5px', color: 'var(--text-muted)', fontWeight: 500, marginTop: 2 }}>
+              Generate spreadsheet and printable PDF reports with breakdown summaries
+            </div>
+          </div>
+        </h2>
+      </div>
 
       <section className="report-panel">
         <div>
-          <h3>Choose the report month</h3>
-          <p>Select a month to see the data available for your report.</p>
+          <h3>Choose Report Period</h3>
+          <p>Filter data by a specific calendar month or generate a complete lifetime archive.</p>
         </div>
 
         <label className="report-month-label" htmlFor="reportMonth">
-          Report month
+          Select Month
           <input
             type="month"
             id="reportMonth"
@@ -337,11 +346,11 @@ export default function Reports() {
             checked={allTime}
             onChange={(e) => setAllTime(e.target.checked)}
           />
-          <span>All time report</span>
+          <span>All-time report</span>
         </label>
 
         <div className="report-date">
-          {hasPeriod ? `Report period: ${periodLabel}` : 'Select a month to prepare a report.'}
+          {hasPeriod ? `Selected Range: ${periodLabel}` : 'Please choose a month or select "All-time report".'}
         </div>
       </section>
 
@@ -349,11 +358,11 @@ export default function Reports() {
         <section className="available-data">
           <div className="available-data-heading">
             <div>
-              <h3>Available data for {periodLabel}</h3>
-              <p>Check the information you want to include in the report.</p>
+              <h3>Available Data Sections for {periodLabel}</h3>
+              <p>Check the datasets you would like to bundle into the exported report.</p>
             </div>
             <button type="button" className="text-button" onClick={handleToggleAll}>
-              {selectedSections.length === 5 ? 'Clear all' : 'Select all'}
+              {selectedSections.length === 5 ? 'Deselect All' : 'Select All'}
             </button>
           </div>
 
@@ -368,8 +377,8 @@ export default function Reports() {
                 <Check />
               </span>
               <span>
-                <strong>Sales summary</strong>
-                <small>Total number of dogs sold and sales revenue.</small>
+                <strong>Sales Revenue Summary</strong>
+                <small>Total dogs sold and total revenue in AED.</small>
               </span>
               <b>{sold.length} sold · {money(totalSales)}</b>
             </label>
@@ -384,8 +393,8 @@ export default function Reports() {
                 <Check />
               </span>
               <span>
-                <strong>Sold dog details</strong>
-                <small>Each dog sold, buyer details, sale date, and amount.</small>
+                <strong>Sold Dogs Detailed Table</strong>
+                <small>Buyer contacts, address, sale price, and date.</small>
               </span>
               <b>{sold.length} records</b>
             </label>
@@ -400,8 +409,8 @@ export default function Reports() {
                 <Check />
               </span>
               <span>
-                <strong>Adoption summary</strong>
-                <small>Total number of dogs adopted during the month.</small>
+                <strong>Adoptions Summary</strong>
+                <small>Total re-homed and adopted dogs.</small>
               </span>
               <b>{adopted.length} adopted</b>
             </label>
@@ -416,8 +425,8 @@ export default function Reports() {
                 <Check />
               </span>
               <span>
-                <strong>Adopted dog details</strong>
-                <small>Each adopted dog, adopter details, and adoption date.</small>
+                <strong>Adopted Dogs Detailed Table</strong>
+                <small>Adopter contacts, location, and dates.</small>
               </span>
               <b>{adopted.length} records</b>
             </label>
@@ -432,8 +441,8 @@ export default function Reports() {
                 <Check />
               </span>
               <span>
-                <strong>New dog registrations</strong>
-                <small>Dogs added to the kennel during this month.</small>
+                <strong>New Registry Additions</strong>
+                <small>Dogs registered into the database in this period.</small>
               </span>
               <b>{registered.length} records</b>
             </label>
@@ -446,7 +455,7 @@ export default function Reports() {
           <div className="excel-export-copy">
             <FileText />
             <div>
-              <h3>Export Excel report</h3>
+              <h3>Excel Spreadsheet (.xlsx)</h3>
               <p>{exportHint}</p>
             </div>
           </div>
@@ -465,7 +474,7 @@ export default function Reports() {
           <div className="pdf-export-copy">
             <FileText />
             <div>
-              <h3>Export PDF report</h3>
+              <h3>Printable PDF Document (.pdf)</h3>
               <p>{exportHint}</p>
             </div>
           </div>

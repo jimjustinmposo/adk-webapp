@@ -113,10 +113,10 @@ export default function Dogs() {
 
   // Filter chip label
   let filterLabel = null;
-  if (statusFilter === 'active') filterLabel = 'Showing: Active Dogs';
-  else if (statusFilter === 'deceased') filterLabel = 'Showing: Deceased Dogs';
-  else if (missingFilter === 'missing') filterLabel = 'Showing: Dogs With Missing Information';
-  else if (locationFilter === 'usa') filterLabel = 'Showing: Dogs in USA';
+  if (statusFilter === 'active') filterLabel = 'Filter: Active Dogs Only';
+  else if (statusFilter === 'deceased') filterLabel = 'Filter: Deceased Dogs Only';
+  else if (missingFilter === 'missing') filterLabel = 'Filter: Dogs With Missing Info';
+  else if (locationFilter === 'usa') filterLabel = 'Filter: Dogs Located in USA';
   else if (sortBy === 'breed') filterLabel = 'Sorted by: Breed';
   else if (sortBy === 'gender') filterLabel = 'Sorted by: Gender';
 
@@ -143,7 +143,7 @@ export default function Dogs() {
 
   const handleDelete = async (id, e) => {
     e.stopPropagation();
-    if (!window.confirm('Delete this dog record?')) return;
+    if (!window.confirm('Are you sure you want to delete this dog record?')) return;
     try {
       await apiRequest(`/dogs/${id}`, { method: 'DELETE' });
       loadDogs(searchTerm);
@@ -154,10 +154,24 @@ export default function Dogs() {
 
   return (
     <main className="main fade-in-up">
-      <h2 className="page-title">
-        <Database />
-        <span>Dog Information Database</span>
-      </h2>
+      <div className="page-header">
+        <h2 className="page-title">
+          <div className="page-title-icon">
+            <Database />
+          </div>
+          <div>
+            <div>Dog Information Database</div>
+            <div style={{ fontSize: '13.5px', color: 'var(--text-muted)', fontWeight: 500, marginTop: 2 }}>
+              Manage, search, and edit canine registry records
+            </div>
+          </div>
+        </h2>
+
+        <button className="btn btn-primary" onClick={handleOpenAdd}>
+          <Plus />
+          <span>Add New Dog</span>
+        </button>
+      </div>
 
       {filterLabel && (
         <div className="filter-chip">
@@ -174,16 +188,11 @@ export default function Dogs() {
           <Search />
           <input
             type="text"
-            placeholder="Search by name, breed, nickname, or microchip..."
+            placeholder="Search by dog name, breed, nickname, or microchip..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-
-        <button className="btn btn-primary" onClick={handleOpenAdd} style={{ width: 'auto' }}>
-          <Plus />
-          <span>Add New Dog</span>
-        </button>
       </div>
 
       <div
@@ -214,7 +223,7 @@ export default function Dogs() {
               <th>Mother</th>
               <th>Comments</th>
               <th>Status</th>
-              <th></th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -225,35 +234,43 @@ export default function Dogs() {
                     <img
                       src={d.photo}
                       alt=""
-                      style={{ width: '34px', height: '34px', borderRadius: '50%', objectFit: 'cover' }}
+                      style={{
+                        width: '38px',
+                        height: '38px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: '1.5px solid var(--blue-200)',
+                        boxShadow: 'var(--shadow-sm)'
+                      }}
                     />
                   ) : (
                     <div
                       style={{
-                        width: '34px',
-                        height: '34px',
+                        width: '38px',
+                        height: '38px',
                         borderRadius: '50%',
-                        background: 'var(--blue-soft)',
+                        background: 'var(--blue-50)',
+                        border: '1.5px solid var(--blue-200)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center'
                       }}
                     >
-                      <CameraOff style={{ width: '14px', height: '14px', color: 'var(--blue)' }} />
+                      <CameraOff style={{ width: '15px', height: '15px', color: 'var(--blue-500)' }} />
                     </div>
                   )}
                 </td>
-                <td>{d.dogid}</td>
-                <td>{d.breed || ''}</td>
-                <td>{d.dogname || ''}</td>
-                <td>{d.nickname || ''}</td>
-                <td>{d.gender || ''}</td>
-                <td>{d.dob ? new Date(d.dob).toLocaleDateString() : ''}</td>
-                <td>{d.microchip || ''}</td>
-                <td>{d.father || ''}</td>
-                <td>{d.mother || ''}</td>
+                <td style={{ fontWeight: 700, color: 'var(--blue-950)' }}>#{d.dogid}</td>
+                <td>{d.breed || '—'}</td>
+                <td style={{ fontWeight: 600 }}>{d.dogname || '—'}</td>
+                <td>{d.nickname || '—'}</td>
+                <td>{d.gender || '—'}</td>
+                <td>{d.dob ? new Date(d.dob).toLocaleDateString() : '—'}</td>
+                <td style={{ fontFamily: 'monospace', fontSize: '12.5px' }}>{d.microchip || '—'}</td>
+                <td>{d.father || '—'}</td>
+                <td>{d.mother || '—'}</td>
                 <td className="truncate-cell" title="Click row to view full details">
-                  {d.comment || ''}
+                  {d.comment || '—'}
                 </td>
                 <td>
                   <span className={`status-pill ${d.status}`}>{d.status}</span>
@@ -295,7 +312,7 @@ export default function Dogs() {
       </div>
 
       {!loading && filteredDogs.length === 0 && (
-        <div className="empty-state">No dogs found.</div>
+        <div className="empty-state">No dog records found matching your search.</div>
       )}
 
       <DogFormModal

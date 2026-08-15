@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { ShieldCheck, ArrowRight, AlertCircle } from 'lucide-react';
 import { apiRequest } from '../api/client';
 
 export default function AdminGate() {
@@ -25,9 +26,9 @@ export default function AdminGate() {
     } catch {
       setErrorHtml(
         <>
-          Incorrect password, please contact{' '}
+          Incorrect administrator password. Please contact{' '}
           <strong>Jim Justin M. Poso (Webapp Developer)</strong> at{' '}
-          <strong>050195318</strong> to create a new account.
+          <strong>050195318</strong> to authorize account creation.
         </>
       );
     } finally {
@@ -38,30 +39,40 @@ export default function AdminGate() {
   return (
     <div className="auth-wrap">
       <div className="auth-card">
-        <h1>Welcome to Alpha Delta Kennel</h1>
-        <p className="subtitle">Create new account page pass</p>
+        <div className="auth-logo-wrap">
+          <img src="/images/logo.jpeg" alt="Alpha Delta Kennel" className="auth-logo-img" />
+        </div>
+        <h1>Admin Authorization</h1>
+        <p className="subtitle">Enter the master administrative pass to register an account</p>
 
-        {errorHtml && <div className="error-msg">{errorHtml}</div>}
+        {errorHtml && (
+          <div className="error-msg">
+            <AlertCircle style={{ width: 20, height: 20, flexShrink: 0 }} />
+            <div>{errorHtml}</div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="field">
-            <label htmlFor="adminPassword">Admin Password</label>
+            <label htmlFor="adminPassword">Master Admin Password</label>
             <input
               type="password"
               id="adminPassword"
               required
               autoFocus
+              placeholder="Enter master authorization pass"
               value={adminPassword}
               onChange={(e) => setAdminPassword(e.target.value)}
             />
           </div>
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Checking...' : 'Continue'}
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: 8 }} disabled={loading}>
+            <ShieldCheck />
+            <span>{loading ? 'Verifying Authorization...' : 'Verify & Continue'}</span>
           </button>
         </form>
 
         <div className="link-row">
-          <Link to="/login">Back to login</Link>
+          <Link to="/login">← Return to Login</Link>
         </div>
       </div>
     </div>

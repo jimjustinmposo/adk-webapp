@@ -11,7 +11,7 @@ export default function DogViewModal({ dog, isOpen, onClose }) {
   if (!isOpen || !dog) return null;
 
   const rows = [
-    ['DogID', dog.dogid],
+    ['DogID', `#${dog.dogid}`],
     ['Breed', dog.breed],
     ['Dog Name', dog.dogname],
     ['Nick Name', dog.nickname],
@@ -41,48 +41,42 @@ export default function DogViewModal({ dog, isOpen, onClose }) {
   return (
     <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="modal modal-view-wrap">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <h3 style={{ margin: 0 }}>Canine Registry Profile</h3>
+          <span className={`status-pill ${dog.status}`}>{dog.status}</span>
+        </div>
+
         <div className="modal-view-row">
           <div className="view-photo-col">
             {dog.photo ? (
               <img src={dog.photo} alt={dog.dogname || 'Dog photo'} />
             ) : (
               <div className="photo-placeholder">
-                <CameraOff style={{ width: 32, height: 32, color: '#fff', opacity: 0.7 }} />
+                <CameraOff style={{ width: 36, height: 36, color: '#ffffff', opacity: 0.6 }} />
               </div>
             )}
           </div>
 
           <div className="view-fields-col">
-            {rows.map(([label, value]) => (
-              <div className="field" key={label}>
-                <label>{label}</label>
-                <div style={{
-                  background: 'rgba(255,255,255,0.92)',
-                  borderRadius: '8px',
-                  padding: '10px 14px',
-                  fontSize: '14px',
-                  color: 'var(--text)',
-                  minHeight: '20px'
-                }}>
-                  {value || value === 0 ? value : <span style={{ opacity: 0.5 }}>—</span>}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '14px' }}>
+              {rows.map(([label, value]) => (
+                <div className="field" key={label} style={{ marginBottom: 0 }}>
+                  <label style={{ color: '#bfdbfe', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    {label}
+                  </label>
+                  <div className="view-field-box">
+                    {value || value === 0 ? value : <span style={{ opacity: 0.4 }}>—</span>}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
 
-            <div className="field">
-              <label>Comments</label>
-              <div style={{
-                background: 'rgba(255,255,255,0.92)',
-                borderRadius: '8px',
-                padding: '10px 14px',
-                fontSize: '14px',
-                color: 'var(--text)',
-                whiteSpace: 'pre-wrap',
-                maxHeight: '220px',
-                overflowY: 'auto',
-                minHeight: '20px'
-              }}>
-                {dog.comment ? dog.comment : <span style={{ opacity: 0.5 }}>No comments</span>}
+            <div className="field" style={{ marginTop: '16px', marginBottom: 0 }}>
+              <label style={{ color: '#bfdbfe', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Comments & Medical / History Notes
+              </label>
+              <div className="view-field-box" style={{ whiteSpace: 'pre-wrap', maxHeight: '160px', overflowY: 'auto' }}>
+                {dog.comment ? dog.comment : <span style={{ opacity: 0.4 }}>No comments recorded</span>}
               </div>
             </div>
           </div>
@@ -96,7 +90,7 @@ export default function DogViewModal({ dog, isOpen, onClose }) {
             style={{ flex: 'none', width: '100%' }}
           >
             <X />
-            <span>Close</span>
+            <span>Close Details</span>
           </button>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Camera, ZoomIn, ZoomOut, Save } from 'lucide-react';
+import { Camera, ZoomIn, ZoomOut, Save, X } from 'lucide-react';
 import { apiRequest } from '../api/client';
 
 const CROP_SIZE = 220;
@@ -235,7 +235,7 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
     const srcH = CROP_SIZE / cropTransform.scale;
 
     ctx.drawImage(cropImageRef.current, srcX, srcY, srcW, srcH, 0, 0, CROP_SIZE, CROP_SIZE);
-    const finalDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+    const finalDataUrl = canvas.toDataURL('image/jpeg', 0.88);
 
     setFormData(prev => ({ ...prev, photo: finalDataUrl }));
     setShowCropper(false);
@@ -290,7 +290,7 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
       onSaved();
       onClose();
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Failed to save dog record.');
     } finally {
       setSaving(false);
     }
@@ -303,40 +303,54 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
   return (
     <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="modal">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 }}>
+          <h3 style={{ margin: 0 }}>{dog ? `Edit Dog Record #${dog.dogid}` : 'Register New Canine Record'}</h3>
+          <button
+            type="button"
+            onClick={onClose}
+            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+          >
+            <X style={{ width: 20, height: 20 }} />
+          </button>
+        </div>
+
         {error && <div className="error-msg">{error}</div>}
 
         <form onSubmit={handleSubmit}>
+          {/* Photo Section */}
           <div className="field">
-            <label>Photo (optional)</label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <label>Dog Profile Photo</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
               {formData.photo ? (
                 <img
                   src={formData.photo}
-                  alt="Dog"
+                  alt="Dog Preview"
                   title="Click to reposition"
                   onClick={() => openCropper(formData.photo)}
                   style={{
-                    width: '64px',
-                    height: '64px',
+                    width: '68px',
+                    height: '68px',
                     borderRadius: '50%',
                     objectFit: 'cover',
-                    background: 'rgba(255,255,255,0.2)',
+                    border: '2px solid rgba(255, 255, 255, 0.4)',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
                     cursor: 'pointer'
                   }}
                 />
               ) : (
                 <div
                   style={{
-                    width: '64px',
-                    height: '64px',
+                    width: '68px',
+                    height: '68px',
                     borderRadius: '50%',
-                    background: 'rgba(255,255,255,0.15)',
+                    background: 'rgba(255,255,255,0.1)',
+                    border: '2px dashed rgba(255, 255, 255, 0.3)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
                   }}
                 >
-                  <Camera style={{ color: '#fff', opacity: 0.7 }} />
+                  <Camera style={{ color: '#ffffff', opacity: 0.7, width: 24, height: 24 }} />
                 </div>
               )}
 
@@ -346,15 +360,15 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
                   type="file"
                   accept="image/*"
                   onChange={handleFileChange}
-                  style={{ background: '#fff', borderRadius: '8px', padding: '8px' }}
+                  style={{ padding: '8px' }}
                 />
                 {formData.photo && (
-                  <div style={{ marginTop: '6px', display: 'flex', gap: '8px' }}>
+                  <div style={{ marginTop: '8px', display: 'flex', gap: '8px' }}>
                     <button
                       type="button"
                       onClick={() => openCropper(formData.photo)}
                       className="btn btn-secondary"
-                      style={{ padding: '4px 10px', fontSize: '12px', minHeight: '28px' }}
+                      style={{ padding: '4px 12px', fontSize: '12px', minHeight: '28px' }}
                     >
                       Reposition
                     </button>
@@ -362,9 +376,9 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
                       type="button"
                       onClick={removePhoto}
                       className="btn btn-secondary"
-                      style={{ padding: '4px 10px', fontSize: '12px', minHeight: '28px' }}
+                      style={{ padding: '4px 12px', fontSize: '12px', minHeight: '28px' }}
                     >
-                      Remove photo
+                      Remove
                     </button>
                   </div>
                 )}
@@ -373,7 +387,7 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
 
             {/* Cropper preview & reposition tool */}
             {showCropper && (
-              <div style={{ marginTop: '14px' }}>
+              <div style={{ marginTop: '16px', padding: '16px', background: 'rgba(0,0,0,0.3)', borderRadius: 'var(--radius-lg)' }}>
                 <div
                   style={{
                     position: 'relative',
@@ -381,8 +395,10 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
                     height: `${CROP_SIZE}px`,
                     margin: '0 auto',
                     overflow: 'hidden',
-                    borderRadius: '16px',
-                    background: '#0b1a33',
+                    borderRadius: '50%',
+                    background: '#040d1e',
+                    border: '2px solid rgba(59, 130, 246, 0.5)',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
                     touchAction: 'none',
                     cursor: isDraggingRef.current ? 'grabbing' : 'grab'
                   }}
@@ -396,7 +412,7 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
                   <img
                     ref={cropImageRef}
                     src={cropSrc}
-                    alt="Crop"
+                    alt="Crop Preview"
                     style={{
                       position: 'absolute',
                       top: 0,
@@ -416,13 +432,13 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '10px',
-                    marginTop: '10px',
+                    marginTop: '12px',
                     maxWidth: `${CROP_SIZE}px`,
                     marginLeft: 'auto',
                     marginRight: 'auto'
                   }}
                 >
-                  <ZoomOut style={{ color: '#fff', width: 16, height: 16 }} />
+                  <ZoomOut style={{ color: '#ffffff', width: 16, height: 16 }} />
                   <input
                     type="range"
                     min="100"
@@ -431,16 +447,16 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
                     onChange={handleZoomChange}
                     style={{ flex: 1 }}
                   />
-                  <ZoomIn style={{ color: '#fff', width: 16, height: 16 }} />
+                  <ZoomIn style={{ color: '#ffffff', width: 16, height: 16 }} />
                 </div>
-                <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.7)', fontSize: '11px', margin: '6px 0 0' }}>
-                  Drag the photo to reposition it
+                <p style={{ textAlign: 'center', color: '#93c5fd', fontSize: '11.5px', margin: '6px 0 0' }}>
+                  Drag photo inside circle to position
                 </p>
                 <div
                   style={{
                     display: 'flex',
                     gap: '10px',
-                    marginTop: '10px',
+                    marginTop: '12px',
                     maxWidth: `${CROP_SIZE}px`,
                     marginLeft: 'auto',
                     marginRight: 'auto'
@@ -450,7 +466,7 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
                     type="button"
                     onClick={cancelCrop}
                     className="btn btn-secondary"
-                    style={{ flex: 1, padding: '8px', fontSize: '12px' }}
+                    style={{ flex: 1, padding: '8px', fontSize: '12px', minHeight: '32px' }}
                   >
                     Cancel
                   </button>
@@ -458,63 +474,65 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
                     type="button"
                     onClick={applyCrop}
                     className="btn btn-primary"
-                    style={{ flex: 1, padding: '8px', fontSize: '12px' }}
+                    style={{ flex: 1, padding: '8px', fontSize: '12px', minHeight: '32px' }}
                   >
-                    Use photo
+                    Save Photo
                   </button>
                 </div>
               </div>
             )}
           </div>
 
-          <div className="field">
-            <label htmlFor="breed">Breed</label>
-            <input id="breed" type="text" value={formData.breed} onChange={handleChange} />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '14px' }}>
+            <div className="field">
+              <label htmlFor="breed">Breed</label>
+              <input id="breed" type="text" value={formData.breed} onChange={handleChange} required />
+            </div>
+
+            <div className="field">
+              <label htmlFor="dogname">Dog Name</label>
+              <input id="dogname" type="text" value={formData.dogname} onChange={handleChange} required />
+            </div>
+
+            <div className="field">
+              <label htmlFor="nickname">Nick Name</label>
+              <input id="nickname" type="text" value={formData.nickname} onChange={handleChange} />
+            </div>
+
+            <div className="field">
+              <label htmlFor="gender">Gender</label>
+              <select id="gender" value={formData.gender} onChange={handleChange}>
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+
+            <div className="field">
+              <label htmlFor="dob">Date of Birth</label>
+              <input id="dob" type="date" value={formData.dob} onChange={handleChange} />
+            </div>
+
+            <div className="field">
+              <label htmlFor="microchip">Microchip Number</label>
+              <input id="microchip" type="text" value={formData.microchip} onChange={handleChange} />
+            </div>
+
+            <div className="field">
+              <label htmlFor="father">Father (Sire)</label>
+              <input id="father" type="text" value={formData.father} onChange={handleChange} />
+            </div>
+
+            <div className="field">
+              <label htmlFor="mother">Mother (Dam)</label>
+              <input id="mother" type="text" value={formData.mother} onChange={handleChange} />
+            </div>
           </div>
 
-          <div className="field">
-            <label htmlFor="dogname">Dog Name</label>
-            <input id="dogname" type="text" value={formData.dogname} onChange={handleChange} />
-          </div>
-
-          <div className="field">
-            <label htmlFor="nickname">Nick Name</label>
-            <input id="nickname" type="text" value={formData.nickname} onChange={handleChange} />
-          </div>
-
-          <div className="field">
-            <label htmlFor="gender">Gender</label>
-            <select id="gender" value={formData.gender} onChange={handleChange}>
-              <option value="">Select</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
-          </div>
-
-          <div className="field">
-            <label htmlFor="dob">Date of Birth</label>
-            <input id="dob" type="date" value={formData.dob} onChange={handleChange} />
-          </div>
-
-          <div className="field">
-            <label htmlFor="microchip">Microchip Number</label>
-            <input id="microchip" type="text" value={formData.microchip} onChange={handleChange} />
-          </div>
-
-          <div className="field">
-            <label htmlFor="father">Father</label>
-            <input id="father" type="text" value={formData.father} onChange={handleChange} />
-          </div>
-
-          <div className="field">
-            <label htmlFor="mother">Mother</label>
-            <input id="mother" type="text" value={formData.mother} onChange={handleChange} />
-          </div>
-
-          <div className="field">
-            <label htmlFor="status">Status</label>
+          <div className="field" style={{ marginTop: 4 }}>
+            <label htmlFor="status">Registry Status</label>
             <select id="status" value={formData.status} onChange={handleChange}>
-              <option value="active">Active</option>
+              <option value="active">Active (In Kennel)</option>
               <option value="deceased">Deceased</option>
               <option value="sold">Sold</option>
               <option value="adopted">Adopted</option>
@@ -522,36 +540,38 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
           </div>
 
           {(isSold || isAdopted) && (
-            <div>
-              <div className="field">
-                <label htmlFor="disposition_date">{isSold ? 'Date Sold' : 'Date Adopted'}</label>
-                <input
-                  id="disposition_date"
-                  type="date"
-                  required
-                  value={formData.disposition_date}
-                  onChange={handleChange}
-                />
-              </div>
-
-              {isSold && (
-                <div className="field">
-                  <label htmlFor="sale_amount">Unit Price (AED)</label>
+            <div style={{ background: 'rgba(255,255,255,0.06)', padding: '16px', borderRadius: 'var(--radius-md)', marginBottom: 18 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isSold ? 'repeat(2, 1fr)' : '1fr', gap: '14px' }}>
+                <div className="field" style={{ marginBottom: 12 }}>
+                  <label htmlFor="disposition_date">{isSold ? 'Date Sold' : 'Date Adopted'}</label>
                   <input
-                    id="sale_amount"
-                    type="text"
-                    inputMode="decimal"
-                    placeholder="0.00 AED"
+                    id="disposition_date"
+                    type="date"
                     required
-                    value={formData.sale_amount}
+                    value={formData.disposition_date}
                     onChange={handleChange}
-                    onBlur={handleSaleAmountBlur}
                   />
                 </div>
-              )}
 
-              <div className="field">
-                <label htmlFor="disposition_contact_name">{person}'s Name</label>
+                {isSold && (
+                  <div className="field" style={{ marginBottom: 12 }}>
+                    <label htmlFor="sale_amount">Unit Price (AED)</label>
+                    <input
+                      id="sale_amount"
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="0.00 AED"
+                      required
+                      value={formData.sale_amount}
+                      onChange={handleChange}
+                      onBlur={handleSaleAmountBlur}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="field" style={{ marginBottom: 12 }}>
+                <label htmlFor="disposition_contact_name">{person}'s Full Name</label>
                 <input
                   id="disposition_contact_name"
                   type="text"
@@ -561,7 +581,7 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
                 />
               </div>
 
-              <div className="field">
+              <div className="field" style={{ marginBottom: 12 }}>
                 <label htmlFor="disposition_contact_address">{person}'s Address</label>
                 <textarea
                   id="disposition_contact_address"
@@ -572,8 +592,8 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
                 />
               </div>
 
-              <div className="field">
-                <label htmlFor="disposition_contact_details">{person}'s Contact Details</label>
+              <div className="field" style={{ marginBottom: 0 }}>
+                <label htmlFor="disposition_contact_details">{person}'s Phone & Email</label>
                 <input
                   id="disposition_contact_details"
                   type="text"
@@ -586,8 +606,14 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
           )}
 
           <div className="field">
-            <label htmlFor="comment">Comments</label>
-            <textarea id="comment" rows={3} value={formData.comment} onChange={handleChange} />
+            <label htmlFor="comment">Comments & History</label>
+            <textarea
+              id="comment"
+              rows={3}
+              placeholder="Add medical notes, titles, awards, or special marks..."
+              value={formData.comment}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="modal-actions">
@@ -596,7 +622,7 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
             </button>
             <button type="submit" className="btn btn-primary" disabled={saving}>
               <Save />
-              <span>{saving ? 'Saving...' : 'Save'}</span>
+              <span>{saving ? 'Saving...' : 'Save Dog Record'}</span>
             </button>
           </div>
         </form>

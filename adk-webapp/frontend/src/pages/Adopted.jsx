@@ -56,26 +56,35 @@ export default function Adopted() {
 
   return (
     <main className="main fade-in-up">
-      <h2 className="page-title">
-        <Heart />
-        <span>Adopted Dogs</span>
-      </h2>
+      <div className="page-header">
+        <h2 className="page-title">
+          <div className="page-title-icon">
+            <Heart />
+          </div>
+          <div>
+            <div>Adopted Dogs Registry</div>
+            <div style={{ fontSize: '13.5px', color: 'var(--text-muted)', fontWeight: 500, marginTop: 2 }}>
+              Manage re-homing, adoption agreements, and adopter details
+            </div>
+          </div>
+        </h2>
+
+        <button className="btn btn-primary" onClick={handleOpenAdd}>
+          <Heart />
+          <span>Mark Dog as Adopted</span>
+        </button>
+      </div>
 
       <div className="toolbar">
         <div className="search-box">
           <Search />
           <input
             type="text"
-            placeholder="Search adopted dogs..."
+            placeholder="Search adopted dogs by name, breed, adopter, or microchip..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-
-        <button className="btn btn-primary" onClick={handleOpenAdd} style={{ width: 'auto' }}>
-          <Heart />
-          <span>Mark Dog as Adopted</span>
-        </button>
       </div>
 
       <div className="table-wrap">
@@ -87,7 +96,7 @@ export default function Adopted() {
               <th>Dog Name</th>
               <th>Breed</th>
               <th>Date Adopted</th>
-              <th>Adopter</th>
+              <th>Adopter's Name</th>
               <th>Adopter's Address</th>
               <th>Contact Details</th>
               <th>Actions</th>
@@ -101,40 +110,46 @@ export default function Adopted() {
                     <img
                       src={dog.photo}
                       alt=""
-                      style={{ width: '34px', height: '34px', borderRadius: '50%', objectFit: 'cover' }}
+                      style={{
+                        width: '38px',
+                        height: '38px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: '1.5px solid var(--blue-200)'
+                      }}
                     />
                   ) : (
                     <div
                       style={{
-                        width: '34px',
-                        height: '34px',
+                        width: '38px',
+                        height: '38px',
                         borderRadius: '50%',
-                        background: 'var(--blue-soft)',
+                        background: 'var(--blue-50)',
+                        border: '1.5px solid var(--blue-200)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center'
                       }}
                     >
-                      <CameraOff style={{ width: '14px', height: '14px', color: 'var(--blue)' }} />
+                      <CameraOff style={{ width: '15px', height: '15px', color: 'var(--blue-500)' }} />
                     </div>
                   )}
                 </td>
-                <td>{dog.dogid}</td>
-                <td>{dog.dogname || ''}</td>
-                <td>{dog.breed || ''}</td>
+                <td style={{ fontWeight: 700, color: 'var(--blue-950)' }}>#{dog.dogid}</td>
+                <td style={{ fontWeight: 600 }}>{dog.dogname || '—'}</td>
+                <td>{dog.breed || '—'}</td>
                 <td>{dateText(dog.disposition_date)}</td>
-                <td>{dog.disposition_contact_name || ''}</td>
-                <td>{dog.disposition_contact_address || ''}</td>
-                <td>{dog.disposition_contact_details || ''}</td>
+                <td style={{ fontWeight: 500 }}>{dog.disposition_contact_name || '—'}</td>
+                <td className="truncate-cell">{dog.disposition_contact_address || '—'}</td>
+                <td>{dog.disposition_contact_details || '—'}</td>
                 <td>
                   <button
                     type="button"
                     className="btn btn-secondary"
                     onClick={() => handleOpenEdit(dog)}
-                    style={{ width: 'auto', padding: '6px 12px' }}
                   >
                     <Edit2 />
-                    <span>Edit</span>
+                    <span>Edit Record</span>
                   </button>
                 </td>
               </tr>
@@ -144,7 +159,7 @@ export default function Adopted() {
       </div>
 
       {!loading && filteredDogs.length === 0 && (
-        <div className="empty-state">No adopted dogs found.</div>
+        <div className="empty-state">No adopted dog records found.</div>
       )}
 
       <AdoptedModal

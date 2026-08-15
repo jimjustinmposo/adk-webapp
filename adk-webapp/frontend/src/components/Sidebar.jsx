@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutGrid, List, Tag, Heart, FileText, LogOut, User, Menu } from 'lucide-react';
+import {
+  LayoutGrid,
+  List,
+  Tag,
+  Heart,
+  FileText,
+  LogOut,
+  User,
+  Menu,
+  X
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Sidebar() {
@@ -12,30 +22,43 @@ export default function Sidebar() {
 
   return (
     <aside className={`sidebar ${navOpen ? 'nav-open' : ''}`}>
+      {/* Mobile Toggle Button */}
       <button
         className="menu-toggle"
         type="button"
-        aria-label="Open menu"
+        aria-label="Toggle navigation menu"
         aria-expanded={navOpen}
         onClick={toggleNav}
       >
-        <Menu />
+        {navOpen ? <X style={{ width: 22, height: 22 }} /> : <Menu style={{ width: 22, height: 22 }} />}
       </button>
 
+      {/* Brand Header */}
+      <div className="sidebar-brand">
+        <img src="/images/logo.jpeg" alt="Alpha Delta Kennel Logo" />
+        <div>
+          <div className="sidebar-brand-title">Alpha Delta Kennel</div>
+          <div className="sidebar-brand-sub">Management Suite</div>
+        </div>
+      </div>
+
+      {/* User Profile Card */}
       <div className="sidebar-profile">
         <div className="sidebar-avatar">
           <User />
         </div>
         <div>
-          <div className="sidebar-name">
+          <div className="sidebar-name" title={user?.nickname ? `Welcome ${user.nickname}` : 'Welcome'}>
             {user?.nickname ? `Welcome ${user.nickname}` : 'Welcome'}
           </div>
-          <div className="sidebar-role">
-            {user?.adminrights ? 'Admin' : 'Not admin'}
+          <div className="sidebar-role-badge">
+            <span className="sidebar-role-dot" />
+            <span>{user?.adminrights ? 'Administrator' : 'Standard User'}</span>
           </div>
         </div>
       </div>
 
+      {/* Navigation Links */}
       <nav className="sidebar-nav">
         <NavLink
           to="/dashboard"
@@ -52,7 +75,7 @@ export default function Sidebar() {
           onClick={closeNav}
         >
           <List />
-          <span>Dogs</span>
+          <span>Dogs Database</span>
         </NavLink>
 
         <NavLink
@@ -61,7 +84,7 @@ export default function Sidebar() {
           onClick={closeNav}
         >
           <Tag />
-          <span>Sold</span>
+          <span>Sold Dogs</span>
         </NavLink>
 
         <NavLink
@@ -70,7 +93,7 @@ export default function Sidebar() {
           onClick={closeNav}
         >
           <Heart />
-          <span>Adopted</span>
+          <span>Adopted Dogs</span>
         </NavLink>
 
         <NavLink
@@ -79,13 +102,14 @@ export default function Sidebar() {
           onClick={closeNav}
         >
           <FileText />
-          <span>Reports</span>
+          <span>Reports & Exports</span>
         </NavLink>
       </nav>
 
+      {/* Logout Action */}
       <button className="sidebar-logout" type="button" onClick={logout}>
         <LogOut />
-        <span>Log out</span>
+        <span>Sign Out</span>
       </button>
     </aside>
   );
