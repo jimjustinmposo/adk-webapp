@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Save, X } from 'lucide-react';
 import { apiRequest } from '../api/client';
 
@@ -123,7 +124,7 @@ export default function SoldModal({ isOpen, onClose, editingDog, availableDogs, 
     }
   };
 
-  return (
+  return createPortal(
     <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="modal" ref={modalRef}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
@@ -261,6 +262,7 @@ export default function SoldModal({ isOpen, onClose, editingDog, availableDogs, 
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

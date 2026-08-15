@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { CameraOff, X } from 'lucide-react';
 
 function formatAed(value) {
@@ -54,7 +55,7 @@ export default function DogViewModal({ dog, isOpen, onClose }) {
     );
   }
 
-  return (
+  return createPortal(
     <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="modal modal-view-wrap" ref={modalRef}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
@@ -116,6 +117,7 @@ export default function DogViewModal({ dog, isOpen, onClose }) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

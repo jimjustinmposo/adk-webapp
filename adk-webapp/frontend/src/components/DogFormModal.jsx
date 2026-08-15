@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Camera, ZoomIn, ZoomOut, Save, X } from 'lucide-react';
 import { apiRequest } from '../api/client';
 
@@ -315,7 +316,7 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
   const isAdopted = formData.status === 'adopted';
   const person = isSold ? 'Buyer' : 'Adopter';
 
-  return (
+  return createPortal(
     <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="modal" ref={modalRef}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 }}>
@@ -642,6 +643,7 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
