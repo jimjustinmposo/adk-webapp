@@ -9,15 +9,27 @@ import {
   XCircle,
   AlertTriangle,
   Flag,
-  ArrowUpRight
+  ArrowUpRight,
+  Tag,
+  HeartHandshake,
+  DollarSign
 } from 'lucide-react';
 import { apiRequest } from '../api/client';
+
+function formatAed(value) {
+  const amount = Number(String(value ?? '').replace(/[^0-9.]/g, ''));
+  if (!Number.isFinite(amount)) return '0.00 AED';
+  return `${new Intl.NumberFormat('en-AE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount)} AED`;
+}
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
     totalDogs: '—',
     activeDogs: '—',
     deceasedDogs: '—',
+    soldDogs: 0,
+    adoptedDogs: 0,
+    totalSalesAmount: 0,
     dogsWithMissingInfo: '—',
     dogsInUSA: '—',
     dogsByBreed: [],
@@ -29,9 +41,46 @@ export default function Dashboard() {
     let mounted = true;
     (async () => {
       try {
-        const data = await apiRequest('/dashboard/stats');
-        if (mounted) {
-          setStats(data);
+        const [dashData, dogsData] = await Promise.all([
+          apiRequest('/dashboard/stats').catch(() => null),
+          apiRequest('/dogs').catch(() => ({ dogs: [] }))
+        ]);
+
+        if (!mounted) return;
+
+        const allDogs = dogsData?.dogs || [];
+        const soldList = allDogs.filter(d => d.status === 'sold');
+        const adoptedList = allDogs.filter(d => d.status === 'adopted');
+        const computedSales = soldList.reduce((sum, d) => sum + Number(d.sale_amount || 0), 0);
+
+        if (dashData) {
+          setStats({
+            ...dashData,
+            soldDogs: dashData.soldDogs !== undefined ? dashData.soldDogs : soldList.length,
+            adoptedDogs: dashData.adoptedDogs !== undefined ? dashData.adoptedDogs : adoptedList.length,
+            totalSalesAmount: dashData.totalSalesAmount !== undefined ? dashData.totalSalesAmount : computedSales
+          });
+        } else {
+          // Fallback entirely from dogs list
+          const activeList = allDogs.filter(d => d.status === 'active');
+          const deceasedList = allDogs.filter(d => d.status === 'deceased');
+          const inUSAList = allDogs.filter(d => (d.comment || '').toLowerCase().includes('location: usa'));
+          const missingList = allDogs.filter(d =>
+            !d.breed || !d.dogname || !d.gender || !d.dob || !d.microchip || !d.father || !d.mother
+          );
+
+          setStats({
+            totalDogs: allDogs.length,
+            activeDogs: activeList.length,
+            deceasedDogs: deceasedList.length,
+            soldDogs: soldList.length,
+            adoptedDogs: adoptedList.length,
+            totalSalesAmount: computedSales,
+            dogsWithMissingInfo: missingList.length,
+            dogsInUSA: inUSAList.length,
+            dogsByBreed: [],
+            dogsByGender: []
+          });
         }
       } catch (err) {
         console.error('Failed to load dashboard stats:', err);
@@ -63,13 +112,14 @@ export default function Dashboard() {
           <div>
             <div>Dashboard Overview</div>
             <div style={{ fontSize: '13.5px', color: 'var(--text-muted)', fontWeight: 500, marginTop: 2 }}>
-              Real-time kennel statistics & database summary
+              Real-time kennel statistics, revenue metrics & registry summary
             </div>
           </div>
         </h2>
       </div>
 
       <div className="stat-grid">
+        {/* Total Dogs */}
         <Link className="stat-card" to="/dogs">
           <div className="stat-card-header">
             <div className="stat-card-icon-wrap">
@@ -78,11 +128,12 @@ export default function Dashboard() {
             <ArrowUpRight className="stat-card-arrow" />
           </div>
           <div>
-            <div className="stat-label">Total Number of Dogs</div>
+            <div className="stat-label">Total Registered Dogs</div>
             <div className="stat-value">{loading ? '—' : stats.totalDogs}</div>
           </div>
         </Link>
 
+        {/* Active Dogs */}
         <Link className="stat-card" to="/dogs?status=active">
           <div className="stat-card-header">
             <div className="stat-card-icon-wrap">
@@ -91,11 +142,58 @@ export default function Dashboard() {
             <ArrowUpRight className="stat-card-arrow" />
           </div>
           <div>
-            <div className="stat-label">Active Dogs</div>
+            <div className="stat-label">Active in Kennel</div>
             <div className="stat-value">{loading ? '—' : stats.activeDogs}</div>
           </div>
         </Link>
 
+        {/* Sold Dogs & Total Sales Sum */}
+        <Link className="stat-card" to="/sold">
+          <div className="stat-card-header">
+            <div className="stat-card-icon-wrap" style={{ background: 'rgba(37, 99, 235, 0.25)', borderColor: 'rgba(96, 165, 250, 0.4)' }}>
+              <Tag style={{ color: '#93c5fd' }} />
+            </div>
+            <ArrowUpRight className="stat-card-arrow" />
+          </div>
+          <div>
+            <div className="stat-label">Sold Dogs & Total Revenue</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
+              <span className="stat-value">{loading ? '—' : stats.soldDogs}</span>
+              <span style={{ fontSize: '13px', color: '#93c5fd', fontWeight: 600 }}>Sold</span>
+            </div>
+            <div style={{
+              marginTop: '8px',
+              paddingTop: '8px',
+              borderTop: '1px solid rgba(255, 255, 255, 0.12)',
+              fontSize: '13px',
+              color: '#dbeafe',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px'
+            }}>
+              <span style={{ color: '#bfdbfe', opacity: 0.8 }}>Sum:</span>
+              <strong style={{ color: '#60a5fa', fontWeight: 700 }}>
+                {loading ? '—' : formatAed(stats.totalSalesAmount)}
+              </strong>
+            </div>
+          </div>
+        </Link>
+
+        {/* Adopted Dogs */}
+        <Link className="stat-card" to="/adopted">
+          <div className="stat-card-header">
+            <div className="stat-card-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.2)', borderColor: 'rgba(252, 211, 77, 0.35)' }}>
+              <HeartHandshake style={{ color: '#fcd34d' }} />
+            </div>
+            <ArrowUpRight className="stat-card-arrow" />
+          </div>
+          <div>
+            <div className="stat-label">Total Dogs Adopted</div>
+            <div className="stat-value">{loading ? '—' : stats.adoptedDogs}</div>
+          </div>
+        </Link>
+
+        {/* Dogs by Breed */}
         <Link className="stat-card" to="/dogs?sort=breed" title={breedTooltip}>
           <div className="stat-card-header">
             <div className="stat-card-icon-wrap">
@@ -109,6 +207,7 @@ export default function Dashboard() {
           </div>
         </Link>
 
+        {/* Male vs Female Ratio */}
         <Link className="stat-card" to="/dogs?sort=gender">
           <div className="stat-card-header">
             <div className="stat-card-icon-wrap">
@@ -122,6 +221,7 @@ export default function Dashboard() {
           </div>
         </Link>
 
+        {/* Deceased Dogs */}
         <Link className="stat-card" to="/dogs?status=deceased">
           <div className="stat-card-header">
             <div className="stat-card-icon-wrap">
@@ -135,6 +235,7 @@ export default function Dashboard() {
           </div>
         </Link>
 
+        {/* Missing Information */}
         <Link className="stat-card" to="/dogs?filter=missing">
           <div className="stat-card-header">
             <div className="stat-card-icon-wrap">
@@ -148,6 +249,7 @@ export default function Dashboard() {
           </div>
         </Link>
 
+        {/* Dogs in USA */}
         <Link className="stat-card" to="/dogs?location=usa">
           <div className="stat-card-header">
             <div className="stat-card-icon-wrap">

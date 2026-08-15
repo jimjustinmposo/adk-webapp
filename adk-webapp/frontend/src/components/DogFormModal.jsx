@@ -43,6 +43,21 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
   const cropImageRef = useRef(null);
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef({ x: 0, y: 0, origX: 0, origY: 0 });
+  const modalRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => {
+        if (modalRef.current) modalRef.current.scrollTop = 0;
+      }, 10);
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (dog) {
@@ -302,7 +317,7 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
 
   return (
     <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="modal">
+      <div className="modal" ref={modalRef}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 }}>
           <h3 style={{ margin: 0 }}>{dog ? `Edit Dog Record #${dog.dogid}` : 'Register New Canine Record'}</h3>
           <button

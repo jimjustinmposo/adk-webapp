@@ -8,10 +8,13 @@ router.use(verifyToken);
 // GET /api/dashboard/stats
 router.get('/stats', async (req, res) => {
   try {
-    const [total, active, deceased, byBreed, byGender, missing, inUSA] = await Promise.all([
+    const [total, active, deceased, sold, adopted, totalSales, byBreed, byGender, missing, inUSA] = await Promise.all([
       pool.query('SELECT COUNT(*) FROM dogtb'),
       pool.query(`SELECT COUNT(*) FROM dogtb WHERE status = 'active'`),
       pool.query(`SELECT COUNT(*) FROM dogtb WHERE status = 'deceased'`),
+      pool.query(`SELECT COUNT(*) FROM dogtb WHERE status = 'sold'`),
+      pool.query(`SELECT COUNT(*) FROM dogtb WHERE status = 'adopted'`),
+      pool.query(`SELECT COALESCE(SUM(sale_amount), 0) AS total_sales FROM dog_status_details WHERE disposition_type = 'sold'`),
       pool.query(`SELECT COALESCE(breed, 'Unknown') AS breed, COUNT(*) FROM dogtb GROUP BY breed ORDER BY COUNT(*) DESC`),
       pool.query(`SELECT COALESCE(gender, 'Unknown') AS gender, COUNT(*) FROM dogtb GROUP BY gender`),
       pool.query(`SELECT COUNT(*) FROM dogtb WHERE
@@ -26,6 +29,9 @@ router.get('/stats', async (req, res) => {
       totalDogs: Number(total.rows[0].count),
       activeDogs: Number(active.rows[0].count),
       deceasedDogs: Number(deceased.rows[0].count),
+      soldDogs: Number(sold.rows[0].count),
+      adoptedDogs: Number(adopted.rows[0].count),
+      totalSalesAmount: Number(totalSales.rows[0].total_sales || 0),
       dogsByBreed: byBreed.rows.map(r => ({ breed: r.breed, count: Number(r.count) })),
       dogsByGender: byGender.rows.map(r => ({ gender: r.gender, count: Number(r.count) })),
       dogsWithMissingInfo: Number(missing.rows[0].count),

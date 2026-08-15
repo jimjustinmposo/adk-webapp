@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { CameraOff, X } from 'lucide-react';
 
 function formatAed(value) {
@@ -8,6 +8,22 @@ function formatAed(value) {
 }
 
 export default function DogViewModal({ dog, isOpen, onClose }) {
+  const modalRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => {
+        if (modalRef.current) modalRef.current.scrollTop = 0;
+      }, 10);
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   if (!isOpen || !dog) return null;
 
   const rows = [
@@ -40,10 +56,16 @@ export default function DogViewModal({ dog, isOpen, onClose }) {
 
   return (
     <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="modal modal-view-wrap">
+      <div className="modal modal-view-wrap" ref={modalRef}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <h3 style={{ margin: 0 }}>Canine Registry Profile</h3>
-          <span className={`status-pill ${dog.status}`}>{dog.status}</span>
+          <button
+            type="button"
+            onClick={onClose}
+            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+          >
+            <X style={{ width: 20, height: 20 }} />
+          </button>
         </div>
 
         <div className="modal-view-row">

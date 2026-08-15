@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Save } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Save, X } from 'lucide-react';
 import { apiRequest } from '../api/client';
 
 function formatAed(value) {
@@ -23,6 +23,21 @@ export default function SoldModal({ isOpen, onClose, editingDog, availableDogs, 
   const [comment, setComment] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const modalRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => {
+        if (modalRef.current) modalRef.current.scrollTop = 0;
+      }, 10);
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (editingDog) {
@@ -102,7 +117,7 @@ export default function SoldModal({ isOpen, onClose, editingDog, availableDogs, 
       onSaved();
       onClose();
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Failed to save sale record.');
     } finally {
       setSaving(false);
     }
@@ -110,21 +125,30 @@ export default function SoldModal({ isOpen, onClose, editingDog, availableDogs, 
 
   return (
     <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="modal">
-        <h3 style={{ margin: '0 0 16px', color: '#fff' }}>
-          {editingDog ? 'Edit Sale Record' : 'Mark Dog as Sold'}
-        </h3>
+      <div className="modal" ref={modalRef}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <h3 style={{ margin: 0 }}>
+            {editingDog ? `Edit Sale Record #${editingDog.dogid}` : 'Mark Dog as Sold'}
+          </h3>
+          <button
+            type="button"
+            onClick={onClose}
+            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+          >
+            <X style={{ width: 20, height: 20 }} />
+          </button>
+        </div>
 
         {error && <div className="error-msg">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           {!editingDog && (
             <div className="field">
-              <label>Search Dog Database</label>
+              <label>Select Dog from Active Registry</label>
               <input
                 type="search"
                 list="availableDogOptions"
-                placeholder="Type a dog's name, nickname, breed, or DogID"
+                placeholder="Type dog name, breed, nickname, or DogID..."
                 value={searchTerm}
                 onChange={handleSearchChange}
                 required
@@ -139,49 +163,53 @@ export default function SoldModal({ isOpen, onClose, editingDog, availableDogs, 
 
           {currentDog && (
             <div style={{
-              background: 'rgba(255,255,255,.15)',
-              color: '#fff',
-              borderRadius: '8px',
-              padding: '10px 14px',
-              marginBottom: '16px',
-              fontSize: '13px'
+              background: 'rgba(255,255,255,.1)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              color: '#ffffff',
+              borderRadius: 'var(--radius-md)',
+              padding: '12px 16px',
+              marginBottom: '18px',
+              fontSize: '13.5px'
             }}>
-              <strong>{editingDog ? 'Editing:' : 'Selected:'}</strong> {dogLabel(currentDog)}
+              <strong style={{ color: '#93c5fd' }}>{editingDog ? 'Editing Dog:' : 'Selected Dog:'}</strong> {dogLabel(currentDog)}
               {currentDog.microchip && ` | Microchip: ${currentDog.microchip}`}
             </div>
           )}
 
-          <div className="field">
-            <label htmlFor="dispositionDate">Date Sold</label>
-            <input
-              id="dispositionDate"
-              type="date"
-              required
-              value={dispositionDate}
-              onChange={(e) => setDispositionDate(e.target.value)}
-            />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+            <div className="field">
+              <label htmlFor="dispositionDate">Date Sold</label>
+              <input
+                id="dispositionDate"
+                type="date"
+                required
+                value={dispositionDate}
+                onChange={(e) => setDispositionDate(e.target.value)}
+              />
+            </div>
+
+            <div className="field">
+              <label htmlFor="saleAmount">Unit Price (AED)</label>
+              <input
+                id="saleAmount"
+                type="text"
+                inputMode="decimal"
+                placeholder="0.00 AED"
+                required
+                value={saleAmount}
+                onChange={(e) => setSaleAmount(e.target.value)}
+                onBlur={handleSaleAmountBlur}
+              />
+            </div>
           </div>
 
           <div className="field">
-            <label htmlFor="saleAmount">Unit Price (AED)</label>
-            <input
-              id="saleAmount"
-              type="text"
-              inputMode="decimal"
-              placeholder="0.00 AED"
-              required
-              value={saleAmount}
-              onChange={(e) => setSaleAmount(e.target.value)}
-              onBlur={handleSaleAmountBlur}
-            />
-          </div>
-
-          <div className="field">
-            <label htmlFor="buyerName">Buyer's Name</label>
+            <label htmlFor="buyerName">Buyer's Full Name</label>
             <input
               id="buyerName"
               type="text"
               required
+              placeholder="e.g. Michael Smith"
               value={buyerName}
               onChange={(e) => setBuyerName(e.target.value)}
             />
@@ -193,6 +221,7 @@ export default function SoldModal({ isOpen, onClose, editingDog, availableDogs, 
               id="buyerAddress"
               rows={2}
               required
+              placeholder="Full physical/shipping address..."
               value={buyerAddress}
               onChange={(e) => setBuyerAddress(e.target.value)}
             />
@@ -204,16 +233,18 @@ export default function SoldModal({ isOpen, onClose, editingDog, availableDogs, 
               id="buyerContact"
               type="text"
               required
+              placeholder="Phone number, WhatsApp, email..."
               value={buyerContact}
               onChange={(e) => setBuyerContact(e.target.value)}
             />
           </div>
 
           <div className="field">
-            <label htmlFor="comment">Comments</label>
+            <label htmlFor="comment">Sale Notes & Agreement Details</label>
             <textarea
               id="comment"
               rows={3}
+              placeholder="Payment terms, delivery date, health guarantees..."
               value={comment}
               onChange={(e) => setComment(e.target.value)}
             />
@@ -225,7 +256,7 @@ export default function SoldModal({ isOpen, onClose, editingDog, availableDogs, 
             </button>
             <button type="submit" className="btn btn-primary" disabled={saving}>
               <Save />
-              <span>{saving ? 'Saving...' : editingDog ? 'Update Sale' : 'Save Sale'}</span>
+              <span>{saving ? 'Saving...' : editingDog ? 'Update Sale Record' : 'Save Sale Record'}</span>
             </button>
           </div>
         </form>

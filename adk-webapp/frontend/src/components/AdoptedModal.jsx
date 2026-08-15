@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Save } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Save, X } from 'lucide-react';
 import { apiRequest } from '../api/client';
 
 function dogLabel(dog) {
@@ -16,6 +16,21 @@ export default function AdoptedModal({ isOpen, onClose, editingDog, availableDog
   const [comment, setComment] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const modalRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => {
+        if (modalRef.current) modalRef.current.scrollTop = 0;
+      }, 10);
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (editingDog) {
@@ -86,7 +101,7 @@ export default function AdoptedModal({ isOpen, onClose, editingDog, availableDog
       onSaved();
       onClose();
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Failed to save adoption record.');
     } finally {
       setSaving(false);
     }
@@ -94,21 +109,30 @@ export default function AdoptedModal({ isOpen, onClose, editingDog, availableDog
 
   return (
     <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="modal">
-        <h3 style={{ margin: '0 0 16px', color: '#fff' }}>
-          {editingDog ? 'Edit Adoption Record' : 'Mark Dog as Adopted'}
-        </h3>
+      <div className="modal" ref={modalRef}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <h3 style={{ margin: 0 }}>
+            {editingDog ? `Edit Adoption Record #${editingDog.dogid}` : 'Mark Dog as Adopted'}
+          </h3>
+          <button
+            type="button"
+            onClick={onClose}
+            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+          >
+            <X style={{ width: 20, height: 20 }} />
+          </button>
+        </div>
 
         {error && <div className="error-msg">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           {!editingDog && (
             <div className="field">
-              <label>Search Dog Database</label>
+              <label>Select Dog from Active Registry</label>
               <input
                 type="search"
                 list="availableAdoptedDogOptions"
-                placeholder="Type a dog's name, nickname, breed, or DogID"
+                placeholder="Type dog name, breed, nickname, or DogID..."
                 value={searchTerm}
                 onChange={handleSearchChange}
                 required
@@ -123,14 +147,15 @@ export default function AdoptedModal({ isOpen, onClose, editingDog, availableDog
 
           {currentDog && (
             <div style={{
-              background: 'rgba(255,255,255,.15)',
-              color: '#fff',
-              borderRadius: '8px',
-              padding: '10px 14px',
-              marginBottom: '16px',
-              fontSize: '13px'
+              background: 'rgba(255,255,255,.1)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              color: '#ffffff',
+              borderRadius: 'var(--radius-md)',
+              padding: '12px 16px',
+              marginBottom: '18px',
+              fontSize: '13.5px'
             }}>
-              <strong>{editingDog ? 'Editing:' : 'Selected:'}</strong> {dogLabel(currentDog)}
+              <strong style={{ color: '#93c5fd' }}>{editingDog ? 'Editing Dog:' : 'Selected Dog:'}</strong> {dogLabel(currentDog)}
               {currentDog.microchip && ` | Microchip: ${currentDog.microchip}`}
             </div>
           )}
@@ -147,11 +172,12 @@ export default function AdoptedModal({ isOpen, onClose, editingDog, availableDog
           </div>
 
           <div className="field">
-            <label htmlFor="adopterName">Adopter's Name</label>
+            <label htmlFor="adopterName">Adopter's Full Name</label>
             <input
               id="adopterName"
               type="text"
               required
+              placeholder="e.g. Sarah Connor"
               value={adopterName}
               onChange={(e) => setAdopterName(e.target.value)}
             />
@@ -163,6 +189,7 @@ export default function AdoptedModal({ isOpen, onClose, editingDog, availableDog
               id="adopterAddress"
               rows={2}
               required
+              placeholder="Full residence address..."
               value={adopterAddress}
               onChange={(e) => setAdopterAddress(e.target.value)}
             />
@@ -174,16 +201,18 @@ export default function AdoptedModal({ isOpen, onClose, editingDog, availableDog
               id="adopterContact"
               type="text"
               required
+              placeholder="Phone number, email, secondary contact..."
               value={adopterContact}
               onChange={(e) => setAdopterContact(e.target.value)}
             />
           </div>
 
           <div className="field">
-            <label htmlFor="comment">Comments</label>
+            <label htmlFor="comment">Adoption Terms & Follow-up Notes</label>
             <textarea
               id="comment"
               rows={3}
+              placeholder="Home inspection status, re-homing terms, vaccinations..."
               value={comment}
               onChange={(e) => setComment(e.target.value)}
             />
