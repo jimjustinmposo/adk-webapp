@@ -87,7 +87,7 @@ export default function SoldModal({ isOpen, onClose, editingDog, availableDogs, 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!currentDog) {
-      setError('Please select a valid dog from the database.');
+      setError('Please select a valid animal from the database.');
       return;
     }
 
@@ -129,7 +129,7 @@ export default function SoldModal({ isOpen, onClose, editingDog, availableDogs, 
       <div className="modal" ref={modalRef}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <h3 style={{ margin: 0 }}>
-            {editingDog ? `Edit Sale Record #${editingDog.dogid}` : 'Mark Dog as Sold'}
+            {editingDog ? `Edit Sale Record #${editingDog.dogid}` : 'Mark Animal as Sold'}
           </h3>
           <button
             type="button"
@@ -145,11 +145,11 @@ export default function SoldModal({ isOpen, onClose, editingDog, availableDogs, 
         <form onSubmit={handleSubmit}>
           {!editingDog && (
             <div className="field">
-              <label>Select Dog from Active Registry</label>
+              <label>Select Animal from Active Registry</label>
               <input
                 type="search"
                 list="availableDogOptions"
-                placeholder="Type dog name, breed, nickname, or DogID..."
+                placeholder="Type animal name, breed, nickname, or ID..."
                 value={searchTerm}
                 onChange={handleSearchChange}
                 required

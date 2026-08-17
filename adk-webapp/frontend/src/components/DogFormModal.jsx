@@ -306,7 +306,7 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
       onSaved();
       onClose();
     } catch (err) {
-      setError(err.message || 'Failed to save dog record.');
+      setError(err.message || 'Failed to save animal record.');
     } finally {
       setSaving(false);
     }
@@ -320,7 +320,7 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
     <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="modal" ref={modalRef}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22 }}>
-          <h3 style={{ margin: 0 }}>{dog ? `Edit Dog Record #${dog.dogid}` : 'Register New Canine Record'}</h3>
+          <h3 style={{ margin: 0 }}>{dog ? `Edit Animal Record #${dog.dogid}` : 'Register New Animal Record'}</h3>
           <button
             type="button"
             onClick={onClose}
@@ -335,12 +335,12 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
         <form onSubmit={handleSubmit}>
           {/* Photo Section */}
           <div className="field">
-            <label>Dog Profile Photo</label>
+            <label>Animal Profile Photo</label>
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
               {formData.photo ? (
                 <img
                   src={formData.photo}
-                  alt="Dog Preview"
+                  alt="Animal Preview"
                   title="Click to reposition"
                   onClick={() => openCropper(formData.photo)}
                   style={{
@@ -506,7 +506,7 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
             </div>
 
             <div className="field">
-              <label htmlFor="dogname">Dog Name</label>
+              <label htmlFor="dogname">Animal Name</label>
               <input id="dogname" type="text" value={formData.dogname} onChange={handleChange} required />
             </div>
 
@@ -638,7 +638,7 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
             </button>
             <button type="submit" className="btn btn-primary" disabled={saving}>
               <Save />
-              <span>{saving ? 'Saving...' : 'Save Dog Record'}</span>
+              <span>{saving ? 'Saving...' : 'Save Animal Record'}</span>
             </button>
           </div>
         </form>

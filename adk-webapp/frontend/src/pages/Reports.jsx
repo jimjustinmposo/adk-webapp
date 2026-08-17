@@ -124,16 +124,16 @@ export default function Reports() {
         'Sales Summary',
         [
           ['Report period', periodLabel],
-          ['Dogs sold', sold.length],
+          ['Animals sold', sold.length],
           ['Total sales', money(totalSales)]
         ]
       ]);
     }
     if (selectedSections.includes('sold-dogs')) {
       sheets.push([
-        'Sold Dogs',
+        'Sold Animals',
         [
-          ['Dog ID', 'Dog Name', 'Breed', 'Date Sold', 'Buyer', "Buyer's Address", 'Contact', 'Sale Amount (AED)'],
+          ['Animal ID', 'Animal Name', 'Breed', 'Date Sold', 'Buyer', "Buyer's Address", 'Contact', 'Sale Amount (AED)'],
           ...sold.map(dog => [
             dog.dogid,
             dog.dogname,
@@ -152,15 +152,15 @@ export default function Reports() {
         'Adoption Summary',
         [
           ['Report period', periodLabel],
-          ['Dogs adopted', adopted.length]
+          ['Animals adopted', adopted.length]
         ]
       ]);
     }
     if (selectedSections.includes('adopted-dogs')) {
       sheets.push([
-        'Adopted Dogs',
+        'Adopted Animals',
         [
-          ['Dog ID', 'Dog Name', 'Breed', 'Date Adopted', 'Adopter', "Adopter's Address", 'Contact'],
+          ['Animal ID', 'Animal Name', 'Breed', 'Date Adopted', 'Adopter', "Adopter's Address", 'Contact'],
           ...adopted.map(dog => [
             dog.dogid,
             dog.dogname,
@@ -177,7 +177,7 @@ export default function Reports() {
       sheets.push([
         'New Registrations',
         [
-          ['Dog ID', 'Dog Name', 'Breed', 'Gender', 'Date Added'],
+          ['Animal ID', 'Animal Name', 'Breed', 'Gender', 'Date Added'],
           ...registered.map(dog => [
             dog.dogid,
             dog.dogname,
@@ -196,10 +196,10 @@ export default function Reports() {
     const workbook = XLSX.utils.book_new();
     const sectionNames = {
       'sales-summary': 'Sales summary',
-      'sold-dogs': 'Sold dog details',
+      'sold-dogs': 'Sold animal details',
       'adoption-summary': 'Adoption summary',
-      'adopted-dogs': 'Adopted dog details',
-      'registered-dogs': 'New dog registrations'
+      'adopted-dogs': 'Adopted animal details',
+      'registered-dogs': 'New animal registrations'
     };
 
     const overview = XLSX.utils.aoa_to_sheet([
@@ -253,15 +253,15 @@ export default function Reports() {
         'Sales Summary',
         ['Metric', 'Value'],
         [
-          ['Dogs sold', sold.length],
+          ['Animals sold', sold.length],
           ['Total sales', money(totalSales)]
         ]
       );
     }
     if (selectedSections.includes('sold-dogs')) {
       addSection(
-        'Sold Dogs',
-        ['Dog', 'Breed', 'Date Sold', 'Buyer', 'Sale Amount'],
+        'Sold Animals',
+        ['Animal', 'Breed', 'Date Sold', 'Buyer', 'Sale Amount'],
         sold.map(dog => [
           dog.dogname || '',
           dog.breed || '',
@@ -275,13 +275,13 @@ export default function Reports() {
       addSection(
         'Adoption Summary',
         ['Metric', 'Value'],
-        [['Dogs adopted', adopted.length]]
+        [['Animals adopted', adopted.length]]
       );
     }
     if (selectedSections.includes('adopted-dogs')) {
       addSection(
-        'Adopted Dogs',
-        ['Dog', 'Breed', 'Date Adopted', 'Adopter', 'Contact'],
+        'Adopted Animals',
+        ['Animal', 'Breed', 'Date Adopted', 'Adopter', 'Contact'],
         adopted.map(dog => [
           dog.dogname || '',
           dog.breed || '',
@@ -294,7 +294,7 @@ export default function Reports() {
     if (selectedSections.includes('registered-dogs')) {
       addSection(
         'New Registrations',
-        ['Dog', 'Breed', 'Gender', 'Date Added'],
+        ['Animal', 'Breed', 'Gender', 'Date Added'],
         registered.map(dog => [
           dog.dogname || '',
           dog.breed || '',
@@ -378,7 +378,7 @@ export default function Reports() {
               </span>
               <span>
                 <strong>Sales Revenue Summary</strong>
-                <small>Total dogs sold and total revenue in AED.</small>
+                <small>Total animals sold and total revenue in AED.</small>
               </span>
               <b>{sold.length} sold · {money(totalSales)}</b>
             </label>
@@ -393,7 +393,7 @@ export default function Reports() {
                 <Check />
               </span>
               <span>
-                <strong>Sold Dogs Detailed Table</strong>
+                <strong>Sold Animals Detailed Table</strong>
                 <small>Buyer contacts, address, sale price, and date.</small>
               </span>
               <b>{sold.length} records</b>
@@ -410,7 +410,7 @@ export default function Reports() {
               </span>
               <span>
                 <strong>Adoptions Summary</strong>
-                <small>Total re-homed and adopted dogs.</small>
+                <small>Total re-homed and adopted animals.</small>
               </span>
               <b>{adopted.length} adopted</b>
             </label>
@@ -425,7 +425,7 @@ export default function Reports() {
                 <Check />
               </span>
               <span>
-                <strong>Adopted Dogs Detailed Table</strong>
+                <strong>Adopted Animals Detailed Table</strong>
                 <small>Adopter contacts, location, and dates.</small>
               </span>
               <b>{adopted.length} records</b>
@@ -442,7 +442,7 @@ export default function Reports() {
               </span>
               <span>
                 <strong>New Registry Additions</strong>
-                <small>Dogs registered into the database in this period.</small>
+                <small>Animals registered into the database in this period.</small>
               </span>
               <b>{registered.length} records</b>
             </label>

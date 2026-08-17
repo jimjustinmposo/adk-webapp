@@ -28,9 +28,9 @@ export default function DogViewModal({ dog, isOpen, onClose }) {
   if (!isOpen || !dog) return null;
 
   const rows = [
-    ['DogID', `#${dog.dogid}`],
+    ['Animal ID', `#${dog.dogid}`],
     ['Breed', dog.breed],
-    ['Dog Name', dog.dogname],
+    ['Animal Name', dog.dogname],
     ['Nick Name', dog.nickname],
     ['Gender', dog.gender],
     ['Date of Birth', dog.dob ? new Date(dog.dob).toLocaleDateString() : ''],
@@ -59,7 +59,7 @@ export default function DogViewModal({ dog, isOpen, onClose }) {
     <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="modal modal-view-wrap" ref={modalRef}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <h3 style={{ margin: 0 }}>Canine Registry Profile</h3>
+          <h3 style={{ margin: 0 }}>Animal Registry Profile</h3>
           <button
             type="button"
             onClick={onClose}
@@ -72,7 +72,7 @@ export default function DogViewModal({ dog, isOpen, onClose }) {
         <div className="modal-view-row">
           <div className="view-photo-col">
             {dog.photo ? (
-              <img src={dog.photo} alt={dog.dogname || 'Dog photo'} />
+              <img src={dog.photo} alt={dog.dogname || 'Animal photo'} />
             ) : (
               <div className="photo-placeholder">
                 <CameraOff style={{ width: 36, height: 36, color: '#ffffff', opacity: 0.6 }} />

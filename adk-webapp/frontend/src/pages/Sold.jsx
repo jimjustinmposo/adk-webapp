@@ -30,7 +30,7 @@ export default function Sold() {
       setSoldDogs(allDogs.filter(dog => dog.status === 'sold'));
       setAvailableDogs(allDogs.filter(dog => dog.status === 'active'));
     } catch (err) {
-      alert(err.message || 'Failed to load sold dogs.');
+      alert(err.message || 'Failed to load sold animals.');
     } finally {
       setLoading(false);
     }
@@ -69,7 +69,7 @@ export default function Sold() {
             <Tag />
           </div>
           <div>
-            <div>Sold Dogs Archive</div>
+            <div>Sold Animals Archive</div>
             <div style={{ fontSize: '13.5px', color: 'var(--text-muted)', fontWeight: 500, marginTop: 2 }}>
               Track sales transactions, buyers, and disposition records
             </div>
@@ -78,7 +78,7 @@ export default function Sold() {
 
         <button className="btn btn-primary" onClick={handleOpenAdd}>
           <Tag />
-          <span>Mark Dog as Sold</span>
+          <span>Mark Animal as Sold</span>
         </button>
       </div>
 
@@ -87,7 +87,7 @@ export default function Sold() {
           <Search />
           <input
             type="text"
-            placeholder="Search sold dogs by name, breed, buyer, or microchip..."
+            placeholder="Search sold animals by name, breed, buyer, or microchip..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -99,8 +99,8 @@ export default function Sold() {
           <thead>
             <tr>
               <th>Photo</th>
-              <th>DogID</th>
-              <th>Dog Name</th>
+              <th>Animal ID</th>
+              <th>Animal Name</th>
               <th>Breed</th>
               <th>Date Sold</th>
               <th>Buyer's Name</th>
@@ -168,7 +168,7 @@ export default function Sold() {
       </div>
 
       {!loading && filteredDogs.length === 0 && (
-        <div className="empty-state">No sold dog records found.</div>
+        <div className="empty-state">No sold animal records found.</div>
       )}
 
       <SoldModal

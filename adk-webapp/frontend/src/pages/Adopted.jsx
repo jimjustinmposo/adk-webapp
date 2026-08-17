@@ -23,7 +23,7 @@ export default function Adopted() {
       setAdoptedDogs(allDogs.filter(dog => dog.status === 'adopted'));
       setAvailableDogs(allDogs.filter(dog => dog.status === 'active'));
     } catch (err) {
-      alert(err.message || 'Failed to load adopted dogs.');
+      alert(err.message || 'Failed to load adopted animals.');
     } finally {
       setLoading(false);
     }
@@ -62,7 +62,7 @@ export default function Adopted() {
             <Heart />
           </div>
           <div>
-            <div>Adopted Dogs Registry</div>
+            <div>Adopted Animals Registry</div>
             <div style={{ fontSize: '13.5px', color: 'var(--text-muted)', fontWeight: 500, marginTop: 2 }}>
               Manage re-homing, adoption agreements, and adopter details
             </div>
@@ -71,7 +71,7 @@ export default function Adopted() {
 
         <button className="btn btn-primary" onClick={handleOpenAdd}>
           <Heart />
-          <span>Mark Dog as Adopted</span>
+          <span>Mark Animal as Adopted</span>
         </button>
       </div>
 
@@ -80,7 +80,7 @@ export default function Adopted() {
           <Search />
           <input
             type="text"
-            placeholder="Search adopted dogs by name, breed, adopter, or microchip..."
+            placeholder="Search adopted animals by name, breed, adopter, or microchip..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -92,8 +92,8 @@ export default function Adopted() {
           <thead>
             <tr>
               <th>Photo</th>
-              <th>DogID</th>
-              <th>Dog Name</th>
+              <th>Animal ID</th>
+              <th>Animal Name</th>
               <th>Breed</th>
               <th>Date Adopted</th>
               <th>Adopter's Name</th>
@@ -159,7 +159,7 @@ export default function Adopted() {
       </div>
 
       {!loading && filteredDogs.length === 0 && (
-        <div className="empty-state">No adopted dog records found.</div>
+        <div className="empty-state">No adopted animal records found.</div>
       )}
 
       <AdoptedModal

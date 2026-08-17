@@ -6,7 +6,6 @@ import {
   Tag,
   Heart,
   FileText,
-  MessageSquareHeart,
   LogOut,
   User,
   Menu,
@@ -76,7 +75,7 @@ export default function Sidebar() {
           onClick={closeNav}
         >
           <List />
-          <span>Dogs Database</span>
+          <span>Animals Database</span>
         </NavLink>
 
         <NavLink
@@ -85,7 +84,7 @@ export default function Sidebar() {
           onClick={closeNav}
         >
           <Tag />
-          <span>Sold Dogs</span>
+          <span>Sold Animals</span>
         </NavLink>
 
         <NavLink
@@ -94,7 +93,7 @@ export default function Sidebar() {
           onClick={closeNav}
         >
           <Heart />
-          <span>Adopted Dogs</span>
+          <span>Adopted Animals</span>
         </NavLink>
 
         <NavLink
@@ -104,15 +103,6 @@ export default function Sidebar() {
         >
           <FileText />
           <span>Reports & Exports</span>
-        </NavLink>
-
-        <NavLink
-          to="/contact"
-          className={({ isActive }) => (isActive ? 'active' : '')}
-          onClick={closeNav}
-        >
-          <MessageSquareHeart />
-          <span>Contact Developer</span>
         </NavLink>
       </nav>
 

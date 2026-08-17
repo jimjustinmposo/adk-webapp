@@ -128,7 +128,7 @@ export default function Dashboard() {
             <ArrowUpRight className="stat-card-arrow" />
           </div>
           <div>
-            <div className="stat-label">Total Registered Dogs</div>
+            <div className="stat-label">Total Registered Animals</div>
             <div className="stat-value">{loading ? '—' : stats.totalDogs}</div>
           </div>
         </Link>
@@ -156,7 +156,7 @@ export default function Dashboard() {
             <ArrowUpRight className="stat-card-arrow" />
           </div>
           <div>
-            <div className="stat-label">Sold Dogs & Total Revenue</div>
+            <div className="stat-label">Sold Animals & Total Revenue</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
               <span className="stat-value">{loading ? '—' : stats.soldDogs}</span>
               <span style={{ fontSize: '13px', color: '#93c5fd', fontWeight: 600 }}>Sold</span>
@@ -188,7 +188,7 @@ export default function Dashboard() {
             <ArrowUpRight className="stat-card-arrow" />
           </div>
           <div>
-            <div className="stat-label">Total Dogs Adopted</div>
+            <div className="stat-label">Total Animals Adopted</div>
             <div className="stat-value">{loading ? '—' : stats.adoptedDogs}</div>
           </div>
         </Link>
@@ -202,7 +202,7 @@ export default function Dashboard() {
             <ArrowUpRight className="stat-card-arrow" />
           </div>
           <div>
-            <div className="stat-label">Dogs by Breed ({breedCount} Breeds)</div>
+            <div className="stat-label">Animals by Breed ({breedCount} Breeds)</div>
             <div className="stat-value">{loading ? '—' : breedCount}</div>
           </div>
         </Link>
@@ -230,7 +230,7 @@ export default function Dashboard() {
             <ArrowUpRight className="stat-card-arrow" />
           </div>
           <div>
-            <div className="stat-label">Deceased Dogs</div>
+            <div className="stat-label">Deceased Animals</div>
             <div className="stat-value">{loading ? '—' : stats.deceasedDogs}</div>
           </div>
         </Link>
@@ -258,7 +258,7 @@ export default function Dashboard() {
             <ArrowUpRight className="stat-card-arrow" />
           </div>
           <div>
-            <div className="stat-label">Dogs in USA</div>
+            <div className="stat-label">Animals in USA</div>
             <div className="stat-value">{loading ? '—' : stats.dogsInUSA}</div>
           </div>
         </Link>

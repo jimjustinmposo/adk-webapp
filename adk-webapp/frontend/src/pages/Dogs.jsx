@@ -49,7 +49,7 @@ export default function Dogs() {
       const data = await apiRequest(`/dogs${q}`);
       setDogs(data.dogs || []);
     } catch (err) {
-      alert(err.message || 'Failed to load dogs.');
+      alert(err.message || 'Failed to load animals.');
     } finally {
       setLoading(false);
     }
@@ -113,10 +113,10 @@ export default function Dogs() {
 
   // Filter chip label
   let filterLabel = null;
-  if (statusFilter === 'active') filterLabel = 'Filter: Active Dogs Only';
-  else if (statusFilter === 'deceased') filterLabel = 'Filter: Deceased Dogs Only';
-  else if (missingFilter === 'missing') filterLabel = 'Filter: Dogs With Missing Info';
-  else if (locationFilter === 'usa') filterLabel = 'Filter: Dogs Located in USA';
+  if (statusFilter === 'active') filterLabel = 'Filter: Active Animals Only';
+  else if (statusFilter === 'deceased') filterLabel = 'Filter: Deceased Animals Only';
+  else if (missingFilter === 'missing') filterLabel = 'Filter: Animals With Missing Info';
+  else if (locationFilter === 'usa') filterLabel = 'Filter: Animals Located in USA';
   else if (sortBy === 'breed') filterLabel = 'Sorted by: Breed';
   else if (sortBy === 'gender') filterLabel = 'Sorted by: Gender';
 
@@ -143,12 +143,12 @@ export default function Dogs() {
 
   const handleDelete = async (id, e) => {
     e.stopPropagation();
-    if (!window.confirm('Are you sure you want to delete this dog record?')) return;
+    if (!window.confirm('Are you sure you want to delete this animal record?')) return;
     try {
       await apiRequest(`/dogs/${id}`, { method: 'DELETE' });
       loadDogs(searchTerm);
     } catch (err) {
-      alert(err.message || 'Failed to delete dog.');
+      alert(err.message || 'Failed to delete animal.');
     }
   };
 
@@ -160,16 +160,16 @@ export default function Dogs() {
             <Database />
           </div>
           <div>
-            <div>Dog Information Database</div>
+            <div>Animal Information Database</div>
             <div style={{ fontSize: '13.5px', color: 'var(--text-muted)', fontWeight: 500, marginTop: 2 }}>
-              Manage, search, and edit canine registry records
+              Manage, search, and edit animal registry records
             </div>
           </div>
         </h2>
 
         <button className="btn btn-primary" onClick={handleOpenAdd}>
           <Plus />
-          <span>Add New Dog</span>
+          <span>Add New Animal</span>
         </button>
       </div>
 
@@ -188,7 +188,7 @@ export default function Dogs() {
           <Search />
           <input
             type="text"
-            placeholder="Search by dog name, breed, nickname, or microchip..."
+            placeholder="Search by animal name, breed, nickname, or microchip..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -212,9 +212,9 @@ export default function Dogs() {
           <thead>
             <tr>
               <th>Photo</th>
-              <th>DogID</th>
+              <th>Animal ID</th>
               <th>Breed</th>
-              <th>Dog Name</th>
+              <th>Animal Name</th>
               <th>Nick Name</th>
               <th>Gender</th>
               <th>DOB</th>
@@ -290,7 +290,7 @@ export default function Dogs() {
                         className="btn btn-secondary"
                         type="button"
                         onClick={(e) => handleOpenEdit(d, e)}
-                        title="Edit Dog"
+                        title="Edit Animal"
                       >
                         <Edit2 />
                       </button>
@@ -298,7 +298,7 @@ export default function Dogs() {
                         className="btn btn-danger"
                         type="button"
                         onClick={(e) => handleDelete(d.dogid, e)}
-                        title="Delete Dog"
+                        title="Delete Animal"
                       >
                         <Trash2 />
                       </button>
@@ -312,7 +312,7 @@ export default function Dogs() {
       </div>
 
       {!loading && filteredDogs.length === 0 && (
-        <div className="empty-state">No dog records found matching your search.</div>
+        <div className="empty-state">No animal records found matching your search.</div>
       )}
 
       <DogFormModal
