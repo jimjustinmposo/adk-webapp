@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
-import { Code2, Lightbulb, Bug, Sparkles, Phone, Send } from 'lucide-react';
+import { Code2, Lightbulb, Bug, Sparkles, Phone, Send, Clock } from 'lucide-react';
 
 // UAE country code assumed from the app's existing AED currency/locale usage.
-// Update WHATSAPP_NUMBER if the developer's number should use a different
-// country code.
-const DISPLAY_NUMBER = '0501905138';
+const DISPLAY_NUMBER = '0501905318';
 const WHATSAPP_NUMBER = '971' + DISPLAY_NUMBER.replace(/^0/, '');
 
 const MESSAGE_TYPES = [
+  { value: 'Bug Report', label: 'Bug Report' },
   { value: 'Suggestion', label: 'Suggestion' },
   { value: 'Improvement', label: 'Improvement' },
-  { value: 'Bug Report', label: 'Bug Report' },
   { value: 'General', label: 'General Feedback' }
 ];
 
@@ -24,7 +22,7 @@ function WhatsAppIcon(props) {
 
 export default function ContactDev() {
   const [name, setName] = useState('');
-  const [type, setType] = useState('Suggestion');
+  const [type, setType] = useState('Bug Report');
   const [message, setMessage] = useState('');
 
   const canSend = message.trim().length > 0;
@@ -60,31 +58,52 @@ export default function ContactDev() {
         </h2>
       </div>
 
-      <div className="contact-dev-wrap">
-        <div className="contact-dev-card">
-          <div className="contact-dev-card-glow" />
+      <div className="contact-page-grid">
+        {/* Left: developer profile */}
+        <aside className="contact-profile-card">
+          <div className="contact-profile-banner" />
+          <div className="contact-avatar-badge">
+            <Code2 style={{ width: 28, height: 28 }} />
+          </div>
+          <div className="contact-profile-name">Jim Justin M. Poso</div>
+          <div className="contact-profile-role">WebApp Developer</div>
 
-          <div className="contact-dev-header">
-            <div className="contact-dev-avatar">
-              <Code2 style={{ width: 26, height: 26 }} />
-            </div>
-            <div>
-              <div className="contact-dev-name">Jim Justin M. Poso</div>
-              <div className="contact-dev-role">WebApp Developer</div>
-            </div>
+          <p className="contact-profile-blurb">
+            Building and maintaining Alpha Delta Kennel. Found something broken, or have
+            an idea to make it better? I'd genuinely like to hear it.
+          </p>
+
+          <div className="contact-profile-tags">
+            <span className="contact-dev-tag"><Bug style={{ width: 13, height: 13 }} /> Bug Reports</span>
+            <span className="contact-dev-tag"><Lightbulb style={{ width: 13, height: 13 }} /> Suggestions</span>
+            <span className="contact-dev-tag"><Sparkles style={{ width: 13, height: 13 }} /> Improvements</span>
           </div>
 
-          <div className="contact-dev-tags">
-            <span className="contact-dev-tag">
-              <Lightbulb style={{ width: 14, height: 14 }} /> Suggestions
-            </span>
-            <span className="contact-dev-tag">
-              <Sparkles style={{ width: 14, height: 14 }} /> Improvements
-            </span>
-            <span className="contact-dev-tag">
-              <Bug style={{ width: 14, height: 14 }} /> Bug Reports
-            </span>
+          <div className="contact-profile-divider" />
+
+          <div className="contact-response-note">
+            <Clock style={{ width: 14, height: 14 }} />
+            <span>Usually replies within a few hours</span>
           </div>
+
+          <a
+            className="contact-number-row"
+            href={`https://wa.me/${WHATSAPP_NUMBER}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <WhatsAppIcon style={{ width: 16, height: 16 }} />
+            <span>{DISPLAY_NUMBER}</span>
+          </a>
+        </aside>
+
+        {/* Right: message form */}
+        <section className="contact-form-card">
+          <h3 className="contact-form-heading">Send a message</h3>
+          <p className="contact-form-subtitle">
+            Fill this in and it opens WhatsApp with your message ready to send —
+            no separate app switching or retyping.
+          </p>
 
           <form className="contact-dev-form" onSubmit={handleSend}>
             <div className="field">
@@ -111,9 +130,9 @@ export default function ContactDev() {
               <label htmlFor="contactMessage">Your Message</label>
               <textarea
                 id="contactMessage"
-                rows={4}
+                rows={5}
                 required
-                placeholder="Describe your suggestion, improvement idea, or the bug you ran into..."
+                placeholder="Describe the bug, suggestion, or improvement idea in as much detail as you can..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
               />
@@ -124,13 +143,9 @@ export default function ContactDev() {
               <span>Send via WhatsApp</span>
               <Send style={{ width: 15, height: 15, opacity: 0.85 }} />
             </button>
+            <p className="contact-form-hint">Opens WhatsApp in a new tab with this message pre-filled.</p>
           </form>
-
-          <div className="contact-dev-number">
-            <Phone style={{ width: 14, height: 14 }} />
-            <span>{DISPLAY_NUMBER}</span>
-          </div>
-        </div>
+        </section>
       </div>
     </main>
   );
