@@ -1497,3 +1497,45 @@ td.actions .btn {
     width: 100%;
   }
 }
+
+/* ==========================================================================
+   SORTABLE TABLE HEADERS
+   ========================================================================== */
+
+.sortable-th {
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.sortable-th:hover {
+  background: var(--blue-100);
+  color: var(--blue-800);
+}
+
+.sortable-th:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -2px;
+}
+
+.sortable-th.active-sort {
+  background: var(--blue-100);
+  color: var(--blue-800);
+}
+
+.sortable-th-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.sortable-th-icon {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  opacity: 0.55;
+}
+
+.sortable-th.active-sort .sortable-th-icon {
+  opacity: 1;
+}
