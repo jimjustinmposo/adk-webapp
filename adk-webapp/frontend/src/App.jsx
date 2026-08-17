@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { ProtectedRoute } from './context/AuthContext';
+import { ProtectedRoute, AdminRoute } from './context/AuthContext';
 import Layout from './components/Layout';
 
 import Login from './pages/Login';
@@ -35,7 +35,7 @@ export default function App() {
         <Route path="dogs" element={<Dogs />} />
         <Route path="sold" element={<Sold />} />
         <Route path="adopted" element={<Adopted />} />
-        <Route path="reports" element={<Reports />} />
+        <Route path="reports" element={<AdminRoute><Reports /></AdminRoute>} />
         <Route path="contact" element={<ContactDev />} />
       </Route>
 

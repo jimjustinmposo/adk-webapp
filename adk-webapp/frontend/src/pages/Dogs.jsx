@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import { apiRequest } from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { useSort, sortRows } from '../hooks/useSort';
+import SortableTh from '../components/SortableTh';
 import DogFormModal from '../components/DogFormModal';
 import DogViewModal from '../components/DogViewModal';
 
@@ -104,12 +106,30 @@ export default function Dogs() {
     if (statusFilter) result = result.filter(d => d.status === statusFilter);
     if (missingFilter === 'missing') result = result.filter(isMissingInfo);
     if (locationFilter === 'usa') result = result.filter(d => (d.comment || '').toLowerCase().includes('location: usa'));
-    if (sortBy === 'breed') result.sort((a, b) => (a.breed || '').localeCompare(b.breed || ''));
-    if (sortBy === 'gender') result.sort((a, b) => (a.gender || '').localeCompare(b.gender || ''));
     return result;
   };
 
-  const filteredDogs = getFilteredDogs();
+  const [sort, toggleSort] = useSort(
+    sortBy === 'breed' ? 'breed' : sortBy === 'gender' ? 'gender' : null
+  );
+
+  const getDogSortValue = (d, key) => {
+    switch (key) {
+      case 'dogid': return d.dogid;
+      case 'breed': return d.breed;
+      case 'dogname': return d.dogname;
+      case 'nickname': return d.nickname;
+      case 'gender': return d.gender;
+      case 'dob': return d.dob;
+      case 'microchip': return d.microchip;
+      case 'father': return d.father;
+      case 'mother': return d.mother;
+      case 'status': return d.status;
+      default: return null;
+    }
+  };
+
+  const filteredDogs = sortRows(getFilteredDogs(), sort, getDogSortValue);
 
   // Filter chip label
   let filterLabel = null;
@@ -212,17 +232,17 @@ export default function Dogs() {
           <thead>
             <tr>
               <th>Photo</th>
-              <th>Animal ID</th>
-              <th>Breed</th>
-              <th>Animal Name</th>
-              <th>Nick Name</th>
-              <th>Gender</th>
-              <th>DOB</th>
-              <th>Microchip</th>
-              <th>Father</th>
-              <th>Mother</th>
+              <SortableTh label="Animal ID" sortKey="dogid" sort={sort} onSort={toggleSort} />
+              <SortableTh label="Breed" sortKey="breed" sort={sort} onSort={toggleSort} />
+              <SortableTh label="Animal Name" sortKey="dogname" sort={sort} onSort={toggleSort} />
+              <SortableTh label="Nick Name" sortKey="nickname" sort={sort} onSort={toggleSort} />
+              <SortableTh label="Gender" sortKey="gender" sort={sort} onSort={toggleSort} />
+              <SortableTh label="DOB" sortKey="dob" sort={sort} onSort={toggleSort} />
+              <SortableTh label="Microchip" sortKey="microchip" sort={sort} onSort={toggleSort} />
+              <SortableTh label="Father" sortKey="father" sort={sort} onSort={toggleSort} />
+              <SortableTh label="Mother" sortKey="mother" sort={sort} onSort={toggleSort} />
               <th>Comments</th>
-              <th>Status</th>
+              <SortableTh label="Status" sortKey="status" sort={sort} onSort={toggleSort} />
               <th>Actions</th>
             </tr>
           </thead>

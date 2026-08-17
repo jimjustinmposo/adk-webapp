@@ -104,3 +104,19 @@ export function ProtectedRoute({ children }) {
 
   return children;
 }
+
+// Guards pages that only admins should be able to open. Standard users are
+// bounced to the dashboard even if they type the URL directly.
+export function AdminRoute({ children }) {
+  const { isAuthenticated, isAdmin } = useAuth();
+  const location = useLocation();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+  if (!isAdmin) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+}

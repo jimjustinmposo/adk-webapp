@@ -14,7 +14,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 
 export default function Sidebar() {
-  const { user, logout } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
   const [navOpen, setNavOpen] = useState(false);
 
   const toggleNav = () => setNavOpen(prev => !prev);
@@ -96,14 +96,16 @@ export default function Sidebar() {
           <span>Adopted Animals</span>
         </NavLink>
 
-        <NavLink
-          to="/reports"
-          className={({ isActive }) => (isActive ? 'active' : '')}
-          onClick={closeNav}
-        >
-          <FileText />
-          <span>Reports & Exports</span>
-        </NavLink>
+        {isAdmin && (
+          <NavLink
+            to="/reports"
+            className={({ isActive }) => (isActive ? 'active' : '')}
+            onClick={closeNav}
+          >
+            <FileText />
+            <span>Reports & Exports</span>
+          </NavLink>
+        )}
       </nav>
 
       {/* Logout Action */}

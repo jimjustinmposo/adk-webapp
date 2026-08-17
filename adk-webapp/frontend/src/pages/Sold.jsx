@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Tag, Search, Edit2, CameraOff } from 'lucide-react';
 import { apiRequest } from '../api/client';
+import { useSort, sortRows } from '../hooks/useSort';
+import SortableTh from '../components/SortableTh';
 import SoldModal from '../components/SoldModal';
 
 function formatAed(value) {
@@ -40,16 +42,36 @@ export default function Sold() {
     loadSoldDogs();
   }, []);
 
-  const filteredDogs = soldDogs.filter(dog => {
-    const term = searchTerm.toLowerCase();
-    return [
-      dog.dogname,
-      dog.breed,
-      dog.disposition_contact_name,
-      dog.microchip,
-      String(dog.dogid)
-    ].some(value => (value || '').toLowerCase().includes(term));
-  });
+  const [sort, toggleSort] = useSort();
+
+  const getSoldSortValue = (dog, key) => {
+    switch (key) {
+      case 'dogid': return dog.dogid;
+      case 'dogname': return dog.dogname;
+      case 'breed': return dog.breed;
+      case 'disposition_date': return dog.disposition_date;
+      case 'disposition_contact_name': return dog.disposition_contact_name;
+      case 'disposition_contact_address': return dog.disposition_contact_address;
+      case 'sale_amount': return dog.sale_amount === null || dog.sale_amount === undefined || dog.sale_amount === '' ? null : Number(dog.sale_amount);
+      case 'disposition_contact_details': return dog.disposition_contact_details;
+      default: return null;
+    }
+  };
+
+  const filteredDogs = sortRows(
+    soldDogs.filter(dog => {
+      const term = searchTerm.toLowerCase();
+      return [
+        dog.dogname,
+        dog.breed,
+        dog.disposition_contact_name,
+        dog.microchip,
+        String(dog.dogid)
+      ].some(value => (value || '').toLowerCase().includes(term));
+    }),
+    sort,
+    getSoldSortValue
+  );
 
   const handleOpenAdd = () => {
     setEditingDog(null);
@@ -99,14 +121,14 @@ export default function Sold() {
           <thead>
             <tr>
               <th>Photo</th>
-              <th>Animal ID</th>
-              <th>Animal Name</th>
-              <th>Breed</th>
-              <th>Date Sold</th>
-              <th>Buyer's Name</th>
-              <th>Buyer's Address</th>
-              <th>Unit Price</th>
-              <th>Contact Details</th>
+              <SortableTh label="Animal ID" sortKey="dogid" sort={sort} onSort={toggleSort} />
+              <SortableTh label="Animal Name" sortKey="dogname" sort={sort} onSort={toggleSort} />
+              <SortableTh label="Breed" sortKey="breed" sort={sort} onSort={toggleSort} />
+              <SortableTh label="Date Sold" sortKey="disposition_date" sort={sort} onSort={toggleSort} />
+              <SortableTh label="Buyer's Name" sortKey="disposition_contact_name" sort={sort} onSort={toggleSort} />
+              <SortableTh label="Buyer's Address" sortKey="disposition_contact_address" sort={sort} onSort={toggleSort} />
+              <SortableTh label="Unit Price" sortKey="sale_amount" sort={sort} onSort={toggleSort} />
+              <SortableTh label="Contact Details" sortKey="disposition_contact_details" sort={sort} onSort={toggleSort} />
               <th>Actions</th>
             </tr>
           </thead>
