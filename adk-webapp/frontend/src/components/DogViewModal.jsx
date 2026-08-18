@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { CameraOff, X } from 'lucide-react';
+import { formatAge } from '../utils/age';
 
 function formatAed(value) {
   const amount = Number(String(value ?? '').replace(/[^0-9.]/g, ''));
@@ -34,6 +35,7 @@ export default function DogViewModal({ dog, isOpen, onClose }) {
     ['Nick Name', dog.nickname],
     ['Gender', dog.gender],
     ['Date of Birth', dog.dob ? new Date(dog.dob).toLocaleDateString() : ''],
+    ['Age', formatAge(dog.dob) || ''],
     ['Microchip Number', dog.microchip],
     ['Father', dog.father],
     ['Mother', dog.mother],

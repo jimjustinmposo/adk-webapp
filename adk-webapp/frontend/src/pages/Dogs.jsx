@@ -14,6 +14,7 @@ import {
 import { apiRequest } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useSort, sortRows } from '../hooks/useSort';
+import { formatAge, ageInDays } from '../utils/age';
 import SortableTh from '../components/SortableTh';
 import DogFormModal from '../components/DogFormModal';
 import DogViewModal from '../components/DogViewModal';
@@ -121,6 +122,7 @@ export default function Dogs() {
       case 'nickname': return d.nickname;
       case 'gender': return d.gender;
       case 'dob': return d.dob;
+      case 'age': return ageInDays(d.dob);
       case 'microchip': return d.microchip;
       case 'father': return d.father;
       case 'mother': return d.mother;
@@ -238,6 +240,7 @@ export default function Dogs() {
               <SortableTh label="Nick Name" sortKey="nickname" sort={sort} onSort={toggleSort} />
               <SortableTh label="Gender" sortKey="gender" sort={sort} onSort={toggleSort} />
               <SortableTh label="DOB" sortKey="dob" sort={sort} onSort={toggleSort} />
+              <SortableTh label="Age" sortKey="age" sort={sort} onSort={toggleSort} />
               <SortableTh label="Microchip" sortKey="microchip" sort={sort} onSort={toggleSort} />
               <SortableTh label="Father" sortKey="father" sort={sort} onSort={toggleSort} />
               <SortableTh label="Mother" sortKey="mother" sort={sort} onSort={toggleSort} />
@@ -286,6 +289,7 @@ export default function Dogs() {
                 <td>{d.nickname || '—'}</td>
                 <td>{d.gender || '—'}</td>
                 <td>{d.dob ? new Date(d.dob).toLocaleDateString() : '—'}</td>
+                <td>{formatAge(d.dob) || '—'}</td>
                 <td style={{ fontFamily: 'monospace', fontSize: '12.5px' }}>{d.microchip || '—'}</td>
                 <td>{d.father || '—'}</td>
                 <td>{d.mother || '—'}</td>
