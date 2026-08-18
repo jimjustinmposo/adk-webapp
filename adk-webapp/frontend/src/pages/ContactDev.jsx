@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
-import { Code2, Lightbulb, Bug, Sparkles, Phone, Send, Clock } from 'lucide-react';
+import { Code2, Send } from 'lucide-react';
 
-// UAE country code assumed from the app's existing AED currency/locale usage.
 const DISPLAY_NUMBER = '0501905318';
 const WHATSAPP_NUMBER = '971' + DISPLAY_NUMBER.replace(/^0/, '');
 
 const MESSAGE_TYPES = [
-  { value: 'Bug Report', label: 'Bug Report' },
+  { value: 'Bug Report', label: 'Bug' },
   { value: 'Suggestion', label: 'Suggestion' },
   { value: 'Improvement', label: 'Improvement' },
-  { value: 'General', label: 'General Feedback' }
+  { value: 'General', label: 'Other' }
 ];
 
 function WhatsAppIcon(props) {
@@ -58,94 +57,78 @@ export default function ContactDev() {
         </h2>
       </div>
 
-      <div className="contact-page-grid">
-        {/* Left: developer profile */}
-        <aside className="contact-profile-card">
-          <div className="contact-profile-banner" />
-          <div className="contact-avatar-badge">
-            <Code2 style={{ width: 28, height: 28 }} />
+      <div className="contact-card">
+        <div className="contact-card-header">
+          <div className="contact-avatar-sm">
+            <Code2 style={{ width: 20, height: 20 }} />
           </div>
-          <div className="contact-profile-name">Jim Justin M. Poso</div>
-          <div className="contact-profile-role">WebApp Developer</div>
+          <div className="contact-header-meta">
+            <div className="contact-header-name">Jim Justin M. Poso</div>
+            <div className="contact-header-role">WebApp Developer</div>
+          </div>
+          <div className="contact-status-chip">
+            <span className="contact-status-dot" />
+            Usually replies within a few hours
+          </div>
+        </div>
 
-          <p className="contact-profile-blurb">
-            Building and maintaining Alpha Delta Kennel. Found something broken, or have
-            an idea to make it better? I'd genuinely like to hear it.
-          </p>
+        <div className="contact-divider" />
 
-          <div className="contact-profile-tags">
-            <span className="contact-dev-tag"><Bug style={{ width: 13, height: 13 }} /> Bug Reports</span>
-            <span className="contact-dev-tag"><Lightbulb style={{ width: 13, height: 13 }} /> Suggestions</span>
-            <span className="contact-dev-tag"><Sparkles style={{ width: 13, height: 13 }} /> Improvements</span>
+        <form className="contact-dev-form" onSubmit={handleSend}>
+          <div className="field">
+            <label htmlFor="contactType">What's this about?</label>
+            <div className="segmented-control" role="radiogroup" aria-label="Message type">
+              {MESSAGE_TYPES.map((t) => (
+                <button
+                  key={t.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={type === t.value}
+                  className={type === t.value ? 'active' : ''}
+                  onClick={() => setType(t.value)}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="contact-profile-divider" />
-
-          <div className="contact-response-note">
-            <Clock style={{ width: 14, height: 14 }} />
-            <span>Usually replies within a few hours</span>
+          <div className="field">
+            <label htmlFor="contactMessage">Your Message</label>
+            <textarea
+              id="contactMessage"
+              rows={5}
+              required
+              placeholder="Describe the bug, suggestion, or improvement idea in as much detail as you can..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            />
           </div>
 
-          <a
-            className="contact-number-row"
-            href={`https://wa.me/${WHATSAPP_NUMBER}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <WhatsAppIcon style={{ width: 16, height: 16 }} />
-            <span>{DISPLAY_NUMBER}</span>
+          <div className="field">
+            <label htmlFor="contactName">Your Name <span className="field-optional">(optional)</span></label>
+            <input
+              id="contactName"
+              type="text"
+              placeholder="e.g. Sarah"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+
+          <button type="submit" className="whatsapp-btn" disabled={!canSend}>
+            <WhatsAppIcon style={{ width: 19, height: 19 }} />
+            <span>Send via WhatsApp</span>
+            <Send style={{ width: 14, height: 14, opacity: 0.85 }} />
+          </button>
+        </form>
+
+        <div className="contact-card-footer">
+          Prefer to message directly? &nbsp;
+          <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">
+            {DISPLAY_NUMBER}
           </a>
-        </aside>
-
-        {/* Right: message form */}
-        <section className="contact-form-card">
-          <h3 className="contact-form-heading">Send a message</h3>
-          <p className="contact-form-subtitle">
-            Fill this in and it opens WhatsApp with your message ready to send —
-            no separate app switching or retyping.
-          </p>
-
-          <form className="contact-dev-form" onSubmit={handleSend}>
-            <div className="field">
-              <label htmlFor="contactName">Your Name (optional)</label>
-              <input
-                id="contactName"
-                type="text"
-                placeholder="e.g. Sarah"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-
-            <div className="field">
-              <label htmlFor="contactType">Message Type</label>
-              <select id="contactType" value={type} onChange={(e) => setType(e.target.value)}>
-                {MESSAGE_TYPES.map((t) => (
-                  <option key={t.value} value={t.value}>{t.label}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="field">
-              <label htmlFor="contactMessage">Your Message</label>
-              <textarea
-                id="contactMessage"
-                rows={5}
-                required
-                placeholder="Describe the bug, suggestion, or improvement idea in as much detail as you can..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-              />
-            </div>
-
-            <button type="submit" className="whatsapp-btn" disabled={!canSend}>
-              <WhatsAppIcon style={{ width: 20, height: 20 }} />
-              <span>Send via WhatsApp</span>
-              <Send style={{ width: 15, height: 15, opacity: 0.85 }} />
-            </button>
-            <p className="contact-form-hint">Opens WhatsApp in a new tab with this message pre-filled.</p>
-          </form>
-        </section>
+        </div>
       </div>
     </main>
   );
