@@ -59,9 +59,6 @@ export default function ContactDev() {
 
       <div className="contact-card">
         <div className="contact-card-header">
-          <div className="contact-avatar-sm">
-            <Code2 style={{ width: 20, height: 20 }} />
-          </div>
           <div className="contact-header-meta">
             <div className="contact-header-name">Jim Justin M. Poso</div>
             <div className="contact-header-role">WebApp Developer</div>
