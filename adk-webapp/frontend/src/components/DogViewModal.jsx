@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { CameraOff, X } from 'lucide-react';
 import { formatAge } from '../utils/age';
+import { formatDate } from '../utils/date';
 
 function formatAed(value) {
   const amount = Number(String(value ?? '').replace(/[^0-9.]/g, ''));
@@ -34,7 +35,7 @@ export default function DogViewModal({ dog, isOpen, onClose }) {
     ['Animal Name', dog.dogname],
     ['Nick Name', dog.nickname],
     ['Gender', dog.gender],
-    ['Date of Birth', dog.dob ? new Date(dog.dob).toLocaleDateString() : ''],
+    ['Date of Birth', dog.dob ? formatDate(dog.dob) : ''],
     ['Age', formatAge(dog.dob) || ''],
     ['Microchip Number', dog.microchip],
     ['Father', dog.father],
@@ -45,7 +46,7 @@ export default function DogViewModal({ dog, isOpen, onClose }) {
   if (dog.status === 'sold' || dog.status === 'adopted') {
     const person = dog.status === 'sold' ? 'Buyer' : 'Adopter';
     rows.push(
-      [dog.status === 'sold' ? 'Date Sold' : 'Date Adopted', dog.disposition_date ? new Date(dog.disposition_date).toLocaleDateString() : '']
+      [dog.status === 'sold' ? 'Date Sold' : 'Date Adopted', dog.disposition_date ? formatDate(dog.disposition_date) : '']
     );
     if (dog.status === 'sold') {
       rows.push(['Unit Price', formatAed(dog.sale_amount)]);

@@ -4,12 +4,10 @@ import * as XLSX from 'xlsx-js-style';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import { apiRequest } from '../api/client';
+import { formatDate as dateText } from '../utils/date';
 
 const money = (value) =>
   `${new Intl.NumberFormat('en-AE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(value || 0))} AED`;
-
-const dateText = (value) =>
-  value ? new Date(`${value.substring(0, 10)}T00:00:00`).toLocaleDateString() : '';
 
 const displayMonth = (value) =>
   new Date(`${value}-01T00:00:00`).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });

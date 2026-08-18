@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Tag, Search, Edit2, CameraOff } from 'lucide-react';
 import { apiRequest } from '../api/client';
 import { useSort, sortRows } from '../hooks/useSort';
+import { formatDate as dateText } from '../utils/date';
 import SortableTh from '../components/SortableTh';
 import SoldModal from '../components/SoldModal';
 
@@ -10,10 +11,6 @@ function formatAed(value) {
   return Number.isFinite(amount)
     ? `${new Intl.NumberFormat('en-AE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount)} AED`
     : '';
-}
-
-function dateText(value) {
-  return value ? new Date(`${value.substring(0, 10)}T00:00:00`).toLocaleDateString() : '';
 }
 
 export default function Sold() {

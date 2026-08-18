@@ -15,6 +15,7 @@ import { apiRequest } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useSort, sortRows } from '../hooks/useSort';
 import { formatAge, ageInDays } from '../utils/age';
+import { formatDate } from '../utils/date';
 import SortableTh from '../components/SortableTh';
 import DogFormModal from '../components/DogFormModal';
 import DogViewModal from '../components/DogViewModal';
@@ -288,7 +289,7 @@ export default function Dogs() {
                 <td style={{ fontWeight: 600 }}>{d.dogname || '—'}</td>
                 <td>{d.nickname || '—'}</td>
                 <td>{d.gender || '—'}</td>
-                <td>{d.dob ? new Date(d.dob).toLocaleDateString() : '—'}</td>
+                <td>{d.dob ? formatDate(d.dob) : '—'}</td>
                 <td>{formatAge(d.dob) || '—'}</td>
                 <td style={{ fontFamily: 'monospace', fontSize: '12.5px' }}>{d.microchip || '—'}</td>
                 <td>{d.father || '—'}</td>

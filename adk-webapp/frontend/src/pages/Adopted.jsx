@@ -2,12 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Heart, Search, Edit2, CameraOff } from 'lucide-react';
 import { apiRequest } from '../api/client';
 import { useSort, sortRows } from '../hooks/useSort';
+import { formatDate as dateText } from '../utils/date';
 import SortableTh from '../components/SortableTh';
 import AdoptedModal from '../components/AdoptedModal';
-
-function dateText(value) {
-  return value ? new Date(`${value.substring(0, 10)}T00:00:00`).toLocaleDateString() : '';
-}
 
 export default function Adopted() {
   const [adoptedDogs, setAdoptedDogs] = useState([]);
