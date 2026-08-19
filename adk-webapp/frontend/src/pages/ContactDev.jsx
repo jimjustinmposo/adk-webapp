@@ -1,50 +1,44 @@
 ```jsx
 import React from "react";
-import "./style.css";
 
 const ContactDev = () => {
-  const WHATSAPP_NUMBER = "971501905318";
-
-  const message = encodeURIComponent(
-    "Hi Jim Justin, I would like to contact you regarding the webapp."
-  );
-
-  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
+  const whatsappUrl =
+    "https://wa.me/971501905318?text=" +
+    encodeURIComponent(
+      "Hi Jim Justin, I would like to get in touch regarding the ADK webapp."
+    );
 
   return (
-    <main className="contact-dev-page">
-      <section className="contact-dev-container">
+    <div className="contact-dev-page">
+      <div className="contact-dev-wrapper">
 
-        {/* Header */}
-        <div className="contact-dev-header">
-          <span className="contact-dev-eyebrow">
-            DEVELOPER CONTACT
-          </span>
+        <div className="contact-dev-top-label">
+          <span className="contact-dev-status-dot"></span>
+          Developer Support
+        </div>
 
+        <div className="contact-dev-heading">
           <h1>
             Contact the
-            <span> Developer</span>
+            <br />
+            <span>Developer.</span>
           </h1>
 
           <p>
-            Have a question about the webapp, need assistance, or want to
-            report an issue? Get in touch directly with the developer.
+            Need help with the webapp? Have a question, found a problem,
+            or have a suggestion? Contact me directly through WhatsApp.
           </p>
         </div>
 
-        {/* Developer Card */}
-        <div className="contact-dev-card">
+        <section className="contact-dev-main-card">
 
-          {/* Developer Identity */}
           <div className="contact-dev-profile">
             <div className="contact-dev-avatar">
               J
             </div>
 
-            <div className="contact-dev-identity">
-              <span className="contact-dev-label">
-                WEBAPP DEVELOPER
-              </span>
+            <div className="contact-dev-profile-info">
+              <span>WEBAPP DEVELOPER</span>
 
               <h2>
                 Jim Justin M. Poso
@@ -56,11 +50,11 @@ const ContactDev = () => {
             </div>
           </div>
 
-          <div className="contact-dev-divider" />
+          <div className="contact-dev-line"></div>
 
-          {/* Contact Content */}
-          <div className="contact-dev-contact-section">
-            <div className="contact-dev-whatsapp-icon">
+          <div className="contact-dev-contact">
+
+            <div className="contact-dev-whatsapp-symbol">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -70,31 +64,33 @@ const ContactDev = () => {
                 strokeLinejoin="round"
               >
                 <path d="M21 11.5a8.38 8.38 0 0 1-9 8.3 8.5 8.5 0 0 1-4.1-1.05L3 20l1.3-4.7A8.3 8.3 0 0 1 3.5 11.2 8.5 8.5 0 1 1 21 11.5Z" />
+
                 <path d="M8.5 9.5c.2-.4.4-.4.7-.4h.5c.2 0 .4.1.5.4l.6 1.4c.1.2.1.4 0 .6l-.4.6c-.1.1-.1.3 0 .5.4.7 1 1.3 1.7 1.7.2.1.4.1.5 0l.6-.4c.2-.1.4-.1.6 0l1.4.6c.2.1.3.3.3.5v.5c0 .3-.1.5-.4.7-.3.2-.7.3-1.1.3-.7 0-1.7-.3-2.8-1.1-1.1-.8-2-1.7-2.8-2.8-.8-1.1-1.1-2.1-1.1-2.8 0-.4.1-.8.3-1.1Z" />
               </svg>
             </div>
 
             <div className="contact-dev-contact-content">
+
               <span className="contact-dev-contact-label">
-                NEED HELP?
+                GET IN TOUCH
               </span>
 
               <h3>
-                Let’s talk on WhatsApp
+                Let's talk about the webapp.
               </h3>
 
               <p>
-                For questions, technical support, feedback, or anything
-                related to the webapp, you can contact me directly through
-                WhatsApp.
+                For technical support, questions, feedback, or suggestions,
+                WhatsApp is the fastest way to reach me.
               </p>
 
               <a
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="contact-dev-whatsapp-button"
+                className="contact-dev-whatsapp"
               >
+
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -104,11 +100,12 @@ const ContactDev = () => {
                   strokeLinejoin="round"
                 >
                   <path d="M21 11.5a8.38 8.38 0 0 1-9 8.3 8.5 8.5 0 0 1-4.1-1.05L3 20l1.3-4.7A8.3 8.3 0 0 1 3.5 11.2 8.5 8.5 0 1 1 21 11.5Z" />
-                  <path d="M8.5 9.5c.2-.4.4-.4.7-.4h.5c.2 0 .4.1.5.4l.6 1.4c.1.2.1.4 0 .6l-.4.6c-.1.1-.1.3 0 .5.4.7 1 1.3 1.7 1.7.2.1.4.1.5 0l.6-.4c.2-.1.4-.1.6 0l1.4.6c.2.1.3.3.3.5v.5c0 .3-.1.5-.4.7-.3.2-.7.3-1.1.3-.7 0-1.7-.3-2.8-1.1-1.1-.8-2-1.7-2.8-2.8-.8-1.1-1.1-2.1-1.1-2.8 0-.4.1-.8.3-1.1Z" />
+
+                  <path d="M8.5 9.5c.2-.4.4-.4.7-.4h.5c.2 0 .4.1.5.4l.6 1.4c.1.2.1.4 0 .6l-.4.6c-.1.1-.1.3 0 .5.4.7 1 1.3 1.7 1.7.2.1.4.1.5 0l.6-.4c.2-.1.4-.1.6 0l1.4.6c.2.1.3.3.3.5v.5c0 .3-.1.5-.4.7-.3.2-.7.3-1.1.3-.7 0-1.7-.3-2.8-1.1-.8-1.1-1.1-2.1-1.1-2.8 0-.4.1-.8.3-1.1Z" />
                 </svg>
 
                 <span>
-                  Contact Jim on WhatsApp
+                  Chat with Jim on WhatsApp
                 </span>
 
                 <svg
@@ -123,36 +120,43 @@ const ContactDev = () => {
                   <path d="M5 12h14" />
                   <path d="m13 6 6 6-6 6" />
                 </svg>
+
               </a>
 
               <p className="contact-dev-note">
                 WhatsApp will open in a new window.
               </p>
+
             </div>
           </div>
 
+        </section>
+
+        <div className="contact-dev-support">
+
+          <div>
+            <strong>Technical Support</strong>
+            <span>Issues &amp; assistance</span>
+          </div>
+
+          <div>
+            <strong>Feedback</strong>
+            <span>Ideas &amp; suggestions</span>
+          </div>
+
+          <div>
+            <strong>Direct Contact</strong>
+            <span>WhatsApp conversation</span>
+          </div>
+
         </div>
 
-        {/* Bottom information */}
-        <div className="contact-dev-footer">
-          <div className="contact-dev-footer-item">
-            <span className="contact-dev-footer-dot" />
-            <span>Direct developer support</span>
-          </div>
+        <p className="contact-dev-footer">
+          Jim Justin M. Poso · Webapp Developer
+        </p>
 
-          <div className="contact-dev-footer-item">
-            <span className="contact-dev-footer-dot" />
-            <span>Questions &amp; technical assistance</span>
-          </div>
-
-          <div className="contact-dev-footer-item">
-            <span className="contact-dev-footer-dot" />
-            <span>Feedback &amp; suggestions</span>
-          </div>
-        </div>
-
-      </section>
-    </main>
+      </div>
+    </div>
   );
 };
 
