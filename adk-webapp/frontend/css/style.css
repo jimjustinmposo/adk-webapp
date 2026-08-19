@@ -1541,71 +1541,66 @@ td.actions .btn {
 }
 
 /* ==========================================================================
-   DATE INPUT OVERLAY (shows a readable "Jan 01, 2026" on top of the native
-   date picker, since browsers control the native input's own text format
-   and it can't be changed directly)
+   DATE INPUT (typeable "MM.DD.YY" field with a calendar-icon fallback)
    ========================================================================== */
 
 .date-input-wrap {
   position: relative;
 }
 
-/* The real, functional date input — kept fully interactive (clicks, keyboard,
-   the native calendar popup) but its own text is made invisible so the
-   overlay text is what's actually seen. */
-.date-input-native {
-  position: relative;
-  z-index: 1;
-  color: transparent !important;
-  background: transparent !important;
+.date-input-text {
+  padding-right: 44px !important;
+  text-overflow: ellipsis;
 }
 
-.date-input-native::-webkit-datetime-edit,
-.date-input-native::-webkit-datetime-edit-fields-wrapper,
-.date-input-native::-webkit-datetime-edit-text,
-.date-input-native::-webkit-datetime-edit-month-field,
-.date-input-native::-webkit-datetime-edit-day-field,
-.date-input-native::-webkit-datetime-edit-year-field {
-  color: transparent !important;
+.date-input-text.is-invalid {
+  border-color: #ef4444 !important;
 }
 
-.date-input-native::-webkit-calendar-picker-indicator {
-  position: relative;
-  z-index: 3;
-  cursor: pointer;
+.date-input-text.is-invalid:focus {
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.16) !important;
 }
 
-/* The visible, styled box sitting behind the (transparent) native input,
-   in the exact same box as the .field input styling so it lines up. */
-.date-input-overlay {
+.date-input-calendar-btn {
   position: absolute;
-  inset: 0;
-  z-index: 0;
+  top: 0;
+  right: 0;
+  width: 42px;
+  height: 100%;
   display: flex;
   align-items: center;
-  padding: 12px 16px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-main);
-  background: #ffffff;
-  box-shadow: var(--shadow-sm);
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-sub);
+  transition: color 0.15s ease;
+}
+
+.date-input-calendar-btn:hover {
+  color: var(--blue-600);
+}
+
+/* Real native picker, kept functional but visually hidden — triggered by
+   the calendar button, and also drives the field when a date IS picked
+   rather than typed. */
+.date-input-hidden-picker {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  border: 0;
+  padding: 0;
   pointer-events: none;
 }
 
-.date-input-overlay.is-empty {
-  color: var(--text-sub);
-  font-weight: 400;
+.date-input-hint {
+  margin-top: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
 }
 
-.date-input-native:focus + .date-input-overlay {
-  border-color: var(--blue-500);
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.16);
-}
-
-/* Dark modal background context */
-.modal .date-input-overlay {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: rgba(255, 255, 255, 0.2);
+.date-input-hint.is-error {
+  color: #fca5a5;
 }
