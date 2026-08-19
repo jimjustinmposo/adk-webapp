@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Save, X } from 'lucide-react';
+import { formatDate } from '../utils/date';
 import { apiRequest } from '../api/client';
 
 function formatAed(value) {
@@ -187,6 +188,7 @@ export default function SoldModal({ isOpen, onClose, editingDog, availableDogs, 
                 value={dispositionDate}
                 onChange={(e) => setDispositionDate(e.target.value)}
               />
+              {dispositionDate && <div className="date-preview">{formatDate(dispositionDate)}</div>}
             </div>
 
             <div className="field">
