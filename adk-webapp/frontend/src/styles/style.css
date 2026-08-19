@@ -1604,3 +1604,196 @@ td.actions .btn {
 .date-input-hint.is-error {
   color: #fca5a5;
 }
+
+/* ==========================================================================
+   CONTACT WEBAPP DEVELOPER PAGE
+   ========================================================================== */
+
+.contact-card {
+  max-width: 620px;
+  margin: 0 auto;
+  background: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  padding: 28px 32px 30px;
+}
+
+.contact-card-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.contact-header-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.contact-header-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+}
+
+.contact-header-role {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.contact-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  padding: 7px 12px;
+  border-radius: var(--radius-full);
+  background: var(--emerald-bg);
+  color: #0d9c6e;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.contact-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 rgba(34, 197, 94, 0.5);
+  animation: contactStatusPulse 2s infinite;
+  flex-shrink: 0;
+}
+
+@keyframes contactStatusPulse {
+  0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.45); }
+  70% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+.contact-divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 22px 0 24px;
+}
+
+.contact-dev-form .field-optional {
+  font-weight: 500;
+  color: var(--text-sub);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.contact-dev-form .field textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+/* Segmented control replaces a plain <select> for message type */
+.segmented-control {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.segmented-control button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 9px 8px;
+  border-radius: calc(var(--radius-md) - 3px);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s var(--ease-smooth);
+}
+
+.segmented-control button:hover {
+  color: var(--text-main);
+}
+
+.segmented-control button.active {
+  background: var(--surface-card);
+  color: var(--blue-700);
+  box-shadow: var(--shadow-sm);
+}
+
+/* --- WhatsApp CTA button --- */
+.whatsapp-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  border: none;
+  padding: 14px 22px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--blue-600) 0%, var(--blue-800) 100%);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.32);
+  transition: all 0.2s var(--ease-spring);
+  margin-top: 4px;
+}
+
+.whatsapp-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--blue-500) 0%, var(--blue-700) 100%);
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.42);
+  transform: translateY(-1px);
+}
+
+.whatsapp-btn:active {
+  transform: scale(0.98);
+}
+
+.whatsapp-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.contact-card-footer {
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--text-sub);
+  margin-top: 18px;
+}
+
+.contact-card-footer a {
+  color: var(--blue-600);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.contact-card-footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .contact-card {
+    padding: 22px 18px 24px;
+  }
+  .contact-status-chip {
+    margin-left: 0;
+  }
+  .segmented-control {
+    flex-wrap: wrap;
+  }
+  .segmented-control button {
+    flex: 1 1 calc(50% - 3px);
+  }
+}
