@@ -1,4 +1,8 @@
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const FULL_MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
 
 /**
  * Parses "YYYY-MM-DD" strings as local calendar dates (avoiding the
@@ -33,13 +37,13 @@ export function formatDate(value) {
 }
 
 /**
- * Formats a date as "Mon DD, YYYY", e.g. "Jan 01, 2026". Used for the
- * readable overlay text shown on top of native date-picker inputs.
+ * Formats a date as "Month D, YYYY", e.g. "August 25, 2026". Used for the
+ * typed/confirmed date-field readout.
  */
 export function formatDateLong(value) {
   const d = parseDate(value);
   if (!d) return '';
-  const mon = MONTHS[d.getMonth()];
+  const mon = FULL_MONTHS[d.getMonth()];
   const day = String(d.getDate()).padStart(2, '0');
   return `${mon} ${day}, ${d.getFullYear()}`;
 }

@@ -44,6 +44,7 @@ function typedToIso(typed) {
 export default function DateInput({ id, value, onChange, required = false }) {
   const [typedValue, setTypedValue] = useState(() => isoToTyped(value));
   const [isInvalid, setIsInvalid] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const pickerRef = useRef(null);
 
   // Keep the typed text in sync if the underlying value changes from
@@ -61,7 +62,12 @@ export default function DateInput({ id, value, onChange, required = false }) {
     setTypedValue(e.target.value);
   };
 
+  const handleTextFocus = () => {
+    setIsFocused(true);
+  };
+
   const handleTextBlur = () => {
+    setIsFocused(false);
     const trimmed = typedValue.trim();
     if (!trimmed) {
       setIsInvalid(false);
@@ -91,7 +97,12 @@ export default function DateInput({ id, value, onChange, required = false }) {
     else el.click();
   };
 
+  // While typing, show the raw editable text. Once you click away, if it's
+  // a valid date, show both together in the same box: "01.01.26 - January 01, 2026".
   const confirmedText = !isInvalid && value ? formatDateLong(value) : '';
+  const displayValue = isFocused || !confirmedText
+    ? typedValue
+    : `${typedValue} - ${confirmedText}`;
 
   return (
     <div className="date-input-wrap">
@@ -101,8 +112,9 @@ export default function DateInput({ id, value, onChange, required = false }) {
         inputMode="numeric"
         placeholder="MM.DD.YY"
         autoComplete="off"
-        value={typedValue}
+        value={displayValue}
         onChange={handleTextChange}
+        onFocus={handleTextFocus}
         onBlur={handleTextBlur}
         required={required}
         className={`date-input-text${isInvalid ? ' is-invalid' : ''}`}
@@ -126,9 +138,6 @@ export default function DateInput({ id, value, onChange, required = false }) {
       />
       {isInvalid && (
         <div className="date-input-hint is-error">Enter a valid date as MM.DD.YY</div>
-      )}
-      {!isInvalid && confirmedText && (
-        <div className="date-input-hint">{confirmedText}</div>
       )}
     </div>
   );
