@@ -1,4 +1,3 @@
-```jsx id="u7zq1k"
 import React from "react";
 
 export default function ContactDev() {
@@ -148,4 +147,3 @@ export default function ContactDev() {
     </main>
   );
 }
-```
