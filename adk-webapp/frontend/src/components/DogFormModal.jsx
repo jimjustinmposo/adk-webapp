@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Camera, ZoomIn, ZoomOut, Save, X } from 'lucide-react';
-import { formatDate } from '../utils/date';
+import DateInput from './DateInput';
 import { apiRequest } from '../api/client';
 
 const CROP_SIZE = 220;
@@ -527,8 +527,7 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
 
             <div className="field">
               <label htmlFor="dob">Date of Birth</label>
-              <input id="dob" type="date" value={formData.dob} onChange={handleChange} />
-              {formData.dob && <div className="date-preview">{formatDate(formData.dob)}</div>}
+              <DateInput id="dob" value={formData.dob} onChange={handleChange} />
             </div>
 
             <div className="field">
@@ -562,14 +561,12 @@ export default function DogFormModal({ dog, isOpen, onClose, onSaved }) {
               <div style={{ display: 'grid', gridTemplateColumns: isSold ? 'repeat(2, 1fr)' : '1fr', gap: '14px' }}>
                 <div className="field" style={{ marginBottom: 12 }}>
                   <label htmlFor="disposition_date">{isSold ? 'Date Sold' : 'Date Adopted'}</label>
-                  <input
+                  <DateInput
                     id="disposition_date"
-                    type="date"
                     required
                     value={formData.disposition_date}
                     onChange={handleChange}
                   />
-                  {formData.disposition_date && <div className="date-preview">{formatDate(formData.disposition_date)}</div>}
                 </div>
 
                 {isSold && (

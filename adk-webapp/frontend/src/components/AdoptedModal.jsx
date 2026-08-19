@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Save, X } from 'lucide-react';
-import { formatDate } from '../utils/date';
+import DateInput from './DateInput';
 import { apiRequest } from '../api/client';
 
 function dogLabel(dog) {
@@ -164,14 +164,12 @@ export default function AdoptedModal({ isOpen, onClose, editingDog, availableDog
 
           <div className="field">
             <label htmlFor="adoptionDate">Date Adopted</label>
-            <input
+            <DateInput
               id="adoptionDate"
-              type="date"
               required
               value={adoptionDate}
               onChange={(e) => setAdoptionDate(e.target.value)}
             />
-            {adoptionDate && <div className="date-preview">{formatDate(adoptionDate)}</div>}
           </div>
 
           <div className="field">

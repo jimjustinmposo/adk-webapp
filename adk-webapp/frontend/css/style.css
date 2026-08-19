@@ -1541,13 +1541,71 @@ td.actions .btn {
 }
 
 /* ==========================================================================
-   DATE PICKER PREVIEW (shows MMM/DD/YY next to native date inputs, since
-   browsers control the native picker's own display format)
+   DATE INPUT OVERLAY (shows a readable "Jan 01, 2026" on top of the native
+   date picker, since browsers control the native input's own text format
+   and it can't be changed directly)
    ========================================================================== */
 
-.date-preview {
-  margin-top: 5px;
-  font-size: 12px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.55);
+.date-input-wrap {
+  position: relative;
+}
+
+/* The real, functional date input — kept fully interactive (clicks, keyboard,
+   the native calendar popup) but its own text is made invisible so the
+   overlay text is what's actually seen. */
+.date-input-native {
+  position: relative;
+  z-index: 1;
+  color: transparent !important;
+  background: transparent !important;
+}
+
+.date-input-native::-webkit-datetime-edit,
+.date-input-native::-webkit-datetime-edit-fields-wrapper,
+.date-input-native::-webkit-datetime-edit-text,
+.date-input-native::-webkit-datetime-edit-month-field,
+.date-input-native::-webkit-datetime-edit-day-field,
+.date-input-native::-webkit-datetime-edit-year-field {
+  color: transparent !important;
+}
+
+.date-input-native::-webkit-calendar-picker-indicator {
+  position: relative;
+  z-index: 3;
+  cursor: pointer;
+}
+
+/* The visible, styled box sitting behind the (transparent) native input,
+   in the exact same box as the .field input styling so it lines up. */
+.date-input-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-main);
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
+  pointer-events: none;
+}
+
+.date-input-overlay.is-empty {
+  color: var(--text-sub);
+  font-weight: 400;
+}
+
+.date-input-native:focus + .date-input-overlay {
+  border-color: var(--blue-500);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.16);
+}
+
+/* Dark modal background context */
+.modal .date-input-overlay {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(255, 255, 255, 0.2);
 }
